@@ -203,9 +203,9 @@ Strategies:
 """
 if __name__ == '__main__':
     EGONET_DIR = 'egonets'
-    TRAINING_DIR = 'Training'
-    FEATURE_FILE = 'features.txt'
-    FEATURE_LIST_FILE = 'featureList.txt'
+    TRAINING_DIR = 'training'
+    FEATURE_FILE = 'features/features.txt'
+    FEATURE_LIST_FILE = 'features/featureList.txt'
 
     # Load friend map.
     friendMap, originalPeople = loadEgoNets(EGONET_DIR)
