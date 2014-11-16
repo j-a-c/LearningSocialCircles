@@ -1,15 +1,18 @@
 import numpy
 
+
 """
 Implementation of the Markov Cluster Algorithm
 
 Person is the id of the person to calculate the cluster for.
 Friend is the map of people to their friends.
+Weights are the weights to use for the MCL matrx.
 """
-def mcl(origPerson, friendMap):
+def mcl(origPerson, data, weights=None):
     ITERATIONS = 20
     POWER = 2
 
+    friendMap = data.friendMap
 
     # Create adjacency matrix. We will map ids to indices in the matrix.
     idMap = {}
@@ -27,22 +30,34 @@ def mcl(origPerson, friendMap):
         reverseIdMap[currentId] = friend
         currentId += 1
 
-    for friend in friendMap[origPerson]:
-        # Add self loop
-        markovMatrix[idMap[friend]][idMap[friend]] = 1
-        # Add adjacent friends
-        for neighbor in friendMap[friend]:
-            if neighbor in idMap and neighbor != origPerson:
-                markovMatrix[idMap[friend]][idMap[neighbor]] = 1
-                markovMatrix[idMap[neighbor]][idMap[friend]] = 1
-        # Add missing connections
-        totalMissing = 0
-        for column in range(numFriends):
-            if markovMatrix[idMap[friend]][column] == 0:
-                totalMissing += 1
-        for column in range(numFriends):
-            if markovMatrix[idMap[friend]][column] == 0:
-                markovMatrix[idMap[friend]][column] = 1.0 / totalMissing
+    if weights:
+        for friend in friendMap[origPerson]:
+            # Add self loop
+            markovMatrix[idMap[friend]][idMap[friend]] = 1
+            # Add adjacent friends
+            for neighbor in friendMap[friend]:
+                if neighbor in idMap and neighbor != origPerson:
+                    weight = weights[friend][neighbor]
+                    markovMatrix[idMap[friend]][idMap[neighbor]] = weight
+                    markovMatrix[idMap[neighbor]][idMap[friend]] = weight
+
+    else:
+        for friend in friendMap[origPerson]:
+            # Add self loop
+            markovMatrix[idMap[friend]][idMap[friend]] = 1
+            # Add adjacent friends
+            for neighbor in friendMap[friend]:
+                if neighbor in idMap and neighbor != origPerson:
+                    markovMatrix[idMap[friend]][idMap[neighbor]] = 1
+                    markovMatrix[idMap[neighbor]][idMap[friend]] = 1
+            # Add missing connections
+            totalMissing = 0
+            for column in range(numFriends):
+                if markovMatrix[idMap[friend]][column] == 0:
+                    totalMissing += 1
+            for column in range(numFriends):
+                if markovMatrix[idMap[friend]][column] == 0:
+                    markovMatrix[idMap[friend]][column] = 1.0 / totalMissing
 
     # Start MCL algorithm
     for iteration in range(ITERATIONS):
@@ -62,7 +77,7 @@ def mcl(origPerson, friendMap):
                 markovMatrix[row, col] = origCol[row]
 
     # Find circles
-    threshold = 0.01
+    threshold = 0.0001
     circles = []
     for row in range(numFriends):
         if max(markovMatrix[row,:]) > threshold:
@@ -71,6 +86,7 @@ def mcl(origPerson, friendMap):
                 if markovMatrix[row,index] > threshold:
                     newCircle.append(reverseIdMap[index])
 
-            circles.append(newCircle)
+            if len(newCircle) > 1:
+                circles.append(newCircle)
 
     return circles
