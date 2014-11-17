@@ -2,13 +2,11 @@ from mcl import mcl
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from clfHelper import attributeAndValue
+from stats import statify
 from visualize import visualize
 
-import circleStats
 import collections
-import numpy
 import os
-import pylab
 import random
 
 """
@@ -265,58 +263,8 @@ if __name__ == '__main__':
     printMetricCommand('sample_submission.csv', 'one_circle.csv')
     """
 
-    """
-    # Sample code to find feature intersection within a user's circles.
-    print 'Intersecting attrs for user 611'
-    attrs = cicleStats.findIntersectionFeaturesPerCircle(trainingMap['611'], featureMap, 0.25)
-    for attr, circle in zip(attrs, trainingMap['611']):
-        print len(circle), attr
-    """
-
-    """
-    # Calculate useful data
-    circleSizes = []
-    circleDiameters = []
-
-    for userid in trainingMap:
-        for circle in trainingMap[userid]:
-            # Size of circle
-            circleSizes.append(len(circle))
-            # Diameter of the circle )
-            circleDiameters.append(circleStats.diameterOf(circle, friendMap))
-
-
-    # Report data
-
-    # Size of circle
-    print 'Circle Size Data:'
-    pylab.title('Histogram of Circle Sizes')
-    pylab.hist(circleSizes, 15)
-    pylab.plot()
-    pylab.show()
-    print '\tAvg:', numpy.average(circleSizes)
-    print '\tStd:', numpy.std(circleSizes)
-    print '\tMin:', min(circleSizes)
-    print '\t25%:', numpy.percentile(circleSizes, 25)
-    print '\t50%:', numpy.percentile(circleSizes, 50)
-    print '\t75%:', numpy.percentile(circleSizes, 75)
-    print '\tMax:', max(circleSizes)
-
-
-    # Diameter of circles
-    print 'Circle Diameter Data:'
-    pylab.title('Histogram of Circle Diameters')
-    pylab.hist(circleDiameters, 15)
-    pylab.plot()
-    pylab.show()
-    print '\tAvg:', numpy.average(circleDiameters)
-    print '\tStd:', numpy.std(circleDiameters)
-    print '\tMin:', min(circleDiameters)
-    print '\t25%:', numpy.percentile(circleDiameters, 25)
-    print '\t50%:', numpy.percentile(circleDiameters, 50)
-    print '\t75%:', numpy.percentile(circleDiameters, 75)
-    print '\tMax:', max(circleDiameters)
-    """
+    # Calculate general stats from data.
+    statify(data)
 
     trainingPeople = []
     for key in data.trainingMap:
