@@ -1,20 +1,29 @@
 import collections
 import networkx as nx
-import os
 import pylab
 
 def visualize(data):
 
-    OUTPUT_DIR = 'graphs'
-
     print 'Starting visualization.'
 
+    # Color for nodes in multiple groups (need to fix muli-coloring)
     MULTICOLOR = 'white'
+    # Color for nodes in no groups
     NO_CIRCLE = 'black'
+    # Edge color (somthing light)
+    EDGE_COLOR = '#eeefff'
+    # Color for the original person
+    ORIG_COLOR = 'red'
 
-    colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple',
+    print 'The original person is colored:', ORIG_COLOR
+    print 'Nodes in multiple circles are colored:', MULTICOLOR
+    print 'Nodes in no circles are colored:', NO_CIRCLE
+    print 'Edge colors are:', EDGE_COLOR
+
+    # Colors we support
+    colors = ['blue', 'green', 'yellow', 'orange', 'purple',
             'indigo', 'magenta', 'pink', 'crimson', 'firebrick', 'chartreuse',
-            'gold', 'mistyrose2', 'lightsalmon2', 'peru', 'limegreen',
+            'gold', 'mistyrose', 'lightsalmon2', 'peru', 'limegreen',
             'khaki1', 'grey73', 'darkorange2', 'cadetblue4', 'aliceblue',
             'mediumseagreen']
 
@@ -35,7 +44,7 @@ def visualize(data):
             for friend in circle:
                 personToColor[friend].append(colorIndex)
             colorIndex += 1
-
+            # If too many circles, break out
             if colorIndex > numColors:
                 break
 
@@ -51,32 +60,33 @@ def visualize(data):
             else:
                 graph.add_node(friend, style='filled', fillcolor=MULTICOLOR)
 
+            # Add edges
             for friendsFriend in friendMap[friend]:
+                # This condition manually adds friends that are not in circles.
                 if (friendsFriend != origPerson) and not (friendsFriend in personToColor) and not (friendsFriend in friendNotInCircles):
                     friendNotInCircles.append(friendsFriend)
 
+                # This is the criteria for adding a edge.
                 graph.add_edge(friend, friendsFriend)
 
-        # Draw graph
-        #output = nx.to_agraph(graph)
-        #output.layout()
-        #outputPath = os.path.join(OUTPUT_DIR, origPerson + '.png')
-        #output.draw(outputPath)
+        # Use spring layout for nice format
         pos = nx.spring_layout(graph)
         pylab.figure(1)
+        # Convert data to pylab input
         nodeColors = []
         for nodeInfo in graph.nodes(data=True):
             if 'fillcolor' in nodeInfo[1]:
                 color = nodeInfo[1]['fillcolor']
                 nodeColors.append(color)
+            elif nodeInfo[0] == origPerson:
+                nodeColors.append(ORIG_COLOR)
             else:
                 nodeColors.append(NO_CIRCLE)
+        # Draw pylab compatible graph
         nx.draw_networkx(graph, pos, nodelist=graph.nodes(),
-                node_color=nodeColors, with_labels=False, node_size=60)
-        #outputPath = os.path.join(OUTPUT_DIR, origPerson + '.svg')
-        #pylab.savefig(outputPath)
-        #pylab.figure(3, figsize=(12,12))
-        #nx.draw(graph, pos)
+                node_color=nodeColors, with_labels=False, node_size=60,
+                edge_color=EDGE_COLOR)
+        # Add title
         pylab.title(origPerson)
         pylab.show()
 
