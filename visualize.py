@@ -2,7 +2,27 @@ import collections
 import networkx as nx
 import pylab
 
-def visualize(data):
+"""
+Returns two if an edge exists between the two people in the orginal topology.
+"""
+def originalTopology(data, person1, person2):
+    if person1 in data.friendMap[person2]:
+        return True
+    return False
+
+
+"""
+Visualizes a friend map given a data pack and function which determines if an
+edge exists between two people. The default edge function is to use the
+original graph topology.
+
+data is data pack from Kaggle.
+edgefunc is a return that takes the data and two people and returns true if an
+    edge should exist between the two people.
+show specifies whether to show the resulting graph.
+save specifies whether to save the resulting graph.
+"""
+def visualize(data, edgefunc=originalTopology, show=True, save=False):
 
     print 'Starting visualization.'
 
@@ -50,8 +70,8 @@ def visualize(data):
 
         # Construct graph
         graph = nx.Graph()
+        # Add colors to people and add missing colors
         for friend in personToColor:
-        #for friend in trainingMap[origPerson][0]:
             friendColorList = personToColor[friend]
             # Person is only in one circle
             if len(friendColorList) == 1:
@@ -66,15 +86,28 @@ def visualize(data):
                 if (friendsFriend != origPerson) and not (friendsFriend in personToColor) and not (friendsFriend in friendNotInCircles):
                     friendNotInCircles.append(friendsFriend)
 
-                # This is the criteria for adding a edge.
-                graph.add_edge(friend, friendsFriend)
+
+        # Attempt to add edges between all pairs of people
+        for friend in personToColor:
+            for friendsFriend in friendMap[friend]:
+                if edgefunc(data, friend, friendsFriend):
+                    graph.add_edge(friend, friendsFriend)
+        for person1 in friendMap[origPerson]:
+            for person2 in friendMap[origPerson]:
+                if edgefunc(data, person1, person2):
+                    graph.add_edge(person1, person2)
+        for person1 in friendMap[origPerson]:
+            if edgefunc(data, origPerson, person1):
+                graph.add_edge(origPerson, person1)
 
         # Use spring layout for nice format
         pos = nx.spring_layout(graph)
         pylab.figure(1)
         # Convert data to pylab input
         nodeColors = []
+        nodeList = []
         for nodeInfo in graph.nodes(data=True):
+            nodeList.append(nodeInfo[0])
             if 'fillcolor' in nodeInfo[1]:
                 color = nodeInfo[1]['fillcolor']
                 nodeColors.append(color)
@@ -83,11 +116,14 @@ def visualize(data):
             else:
                 nodeColors.append(NO_CIRCLE)
         # Draw pylab compatible graph
-        nx.draw_networkx(graph, pos, nodelist=graph.nodes(),
+        nx.draw_networkx(graph, pos, nodelist=nodeList,
                 node_color=nodeColors, with_labels=False, node_size=60,
                 edge_color=EDGE_COLOR)
         # Add title
         pylab.title(origPerson)
-        pylab.show()
+        if save:
+            None # TODO
+        if show:
+            pylab.show()
 
     print 'Ending visualization.'
