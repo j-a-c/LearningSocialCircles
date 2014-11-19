@@ -19,8 +19,12 @@ def _reportHistData(title, data):
 
 """
 Entry point for calculating statistics.
+
+Data = the input data pack.
+trim = true if we should not consider attributes a majority of the group has in
+common.
 """
-def statify(data):
+def statify(data, trim=False):
 
     trainingMap = data.trainingMap
     featureMap = data.featureMap
@@ -29,11 +33,17 @@ def statify(data):
     # Sample code to find feature intersection within a user's circles.
     print 'Intersecting attrs:'
     for person in trainingMap:
-        print person
-        attrs = _findIntersectionFeaturesPerCircle(trainingMap[person], featureMap, 0.25)
+        print '\tuserid', person, ', who has # friends:', len(friendMap[person]), 'and # circles', len(trainingMap[person])
+        print '\tuserid\'s attributes:', data.featureMap[person]
+        tooCommonAttrs= {}
+        if trim:
+            tooCommonAttrs = _findCommonFeaturesPerEgoNet(person, data)
+            print '\t\tAttributes common for this egonet:', tooCommonAttrs
+        attrs = _findIntersectionFeaturesPerCircle(trainingMap[person], featureMap, 0.25, tooCommonAttrs)
+        # Exclude attributes the circle as a whole has in common
         for attr, circle in zip(attrs, trainingMap[person]):
             sortedAttr = sorted(attr.items(), key=lambda x:x[1], reverse=True)
-            print '\t', len(circle), sortedAttr
+            print '\t\t', len(circle), sortedAttr
 
 
     # Calculate useful data
@@ -77,12 +87,30 @@ def statify(data):
     _reportHistData('Circle Diameters:', circleDiameters)
 
 
+def _findCommonFeaturesPerEgoNet(userid, data, percent=0.5):
+    commonAttrs = {}
+
+    allAttrs = collections.defaultdict(int)
+    for person in data.friendMap[userid]:
+        # Count the occurrences per features
+        featureMapForPerson = data.featureMap[person]
+        for feature in featureMapForPerson:
+            allAttrs[feature + featureMapForPerson[feature]] += 1
+
+    # Keep features that have more than a percent people with them.
+    for key in allAttrs:
+        if allAttrs[key] > percent * len(data.friendMap[userid]):
+            commonAttrs[key] = allAttrs[key]
+
+    return commonAttrs
+
+
 """
 Returns features that people in the circles had in common.
 Percent specifies the percent of people that must share the feature in order
 for it to be returned.
 """
-def _findIntersectionFeaturesPerCircle(circles, featureMap, percent=0.5):
+def _findIntersectionFeaturesPerCircle(circles, featureMap, percent=0.5, exclude={}):
     commonAttrs = []
     for circle in circles:
         commonAttrsForCircle = {}
@@ -94,9 +122,9 @@ def _findIntersectionFeaturesPerCircle(circles, featureMap, percent=0.5):
             for feature in featureMapForPerson:
                 allAttrsForCircle[feature + featureMapForPerson[feature]] += 1
 
-        # Keep features that have more than 2 people with them.
+        # Keep features that have more than a percent people with them.
         for key in allAttrsForCircle:
-            if allAttrsForCircle[key] > percent * len(circle):
+            if (allAttrsForCircle[key] > percent * len(circle)) and (key not in exclude):
                 commonAttrsForCircle[key] = allAttrsForCircle[key]
 
         commonAttrs.append(commonAttrsForCircle)

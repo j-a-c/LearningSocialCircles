@@ -231,6 +231,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', action='store_true', help='Compute statistics.')
     parser.add_argument('-p', action='store_true', help='Predict social circles.')
     parser.add_argument('-v', action='store_true', help='Visualize data.')
+    parser.add_argument('--trim', action='store_true', help='Trim common data.')
     args = parser.parse_args()
 
     # Input data locations.
@@ -271,7 +272,9 @@ if __name__ == '__main__':
     """
 
     # Calculate general stats from data.
-    if args.s:
+    if args.s and args.trim:
+        statify(data, True)
+    elif args.s:
         statify(data)
 
     trainingPeople = []
