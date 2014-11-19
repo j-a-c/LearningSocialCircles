@@ -14,4 +14,8 @@ Flags:
 - --trim Output data common per egonet. This set will be ignored when
   displaying intersection attributes.
 - -p Predict social circles.
-- -v Visualize data.
+- -v Visualize data. By default uses original topology to construct graphs.
+- --edge Select the edge function to use when visualizing data. Supported
+  options are: 
+  * top: Uses the original graph topology.
+  * sim: Creates edges between similar users.

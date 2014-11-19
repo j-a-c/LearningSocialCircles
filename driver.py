@@ -3,6 +3,8 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from clfHelper import attributeAndValue
 from stats import statify
+from visualize import originalTopology
+from visualize import similarAttributes
 from visualize import visualize
 
 import argparse
@@ -232,10 +234,20 @@ if __name__ == '__main__':
     # Initialize argument parser
     parser = argparse.ArgumentParser(description='Process social circle data.')
     parser.add_argument('-s', action='store_true', help='Compute statistics.')
-    parser.add_argument('-p', action='store_true', help='Predict social circles.')
-    parser.add_argument('-v', action='store_true', help='Visualize data.')
     parser.add_argument('--trim', action='store_true', help='Trim common data.')
+    parser.add_argument('-p', action='store_true', help='Predict social circles.')
+    parser.add_argument('-v', action='store_true', help='Visualize data. By \
+            default uses original topology to construct graphs.')
+    parser.add_argument('--edge', action='store', help='Select edge function')
     args = parser.parse_args()
+
+    # Validate arguments
+    EDGE_FUNCS = ['top', 'sim']
+    if args.edge not in EDGE_FUNCS:
+        print 'Invalid edge function:', args.edge
+        print 'Allowable edge functions:', EDGE_FUNCS
+        quit()
+
 
     # Input data locations.
     EGONET_DIR = 'egonets'
@@ -311,7 +323,11 @@ if __name__ == '__main__':
     """
 
     # Visualize data
-    if args.v:
+    if args.v and args.edge == 'top':
+        visualize(data, originalTopology)
+    elif args.v and args.edge == 'sim':
+        visualize(data, similarAttributes)
+    elif args.v:
         visualize(data)
 
     if args.p:
