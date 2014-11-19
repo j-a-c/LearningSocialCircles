@@ -30,13 +30,6 @@ def similarAttributes(data, person1, person2, threshold=3):
 
 
 """
-Returns true if the two people have more than 'thres'
-"""
-def topologyAttributes(data, person1, person2):
-    None
-
-
-"""
 Visualizes a friend map given a data pack and function which determines if an
 edge exists between two people. The default edge function is to use the
 original graph topology.
