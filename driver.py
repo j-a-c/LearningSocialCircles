@@ -5,7 +5,7 @@ from clfHelper import attributeAndValue
 from stats import statify
 from visualize import originalTopology
 from visualize import similarAttributes
-from visualize import visualize
+from visualize import Visualizer
 
 import argparse
 import collections
@@ -239,10 +239,12 @@ if __name__ == '__main__':
     parser.add_argument('-v', action='store_true', help='Visualize data. By \
             default uses original topology to construct graphs.')
     parser.add_argument('--edge', action='store', help='Select edge function')
+    parser.add_argument('--split', action='store_true', help='Split \
+            visualizations by circle.')
     args = parser.parse_args()
 
     # Validate arguments
-    EDGE_FUNCS = ['top', 'sim']
+    EDGE_FUNCS = {'top': originalTopology, 'sim': similarAttributes, None: originalTopology}
     if args.edge not in EDGE_FUNCS:
         print 'Invalid edge function:', args.edge
         print 'Allowable edge functions:', EDGE_FUNCS
@@ -323,12 +325,9 @@ if __name__ == '__main__':
     """
 
     # Visualize data
-    if args.v and args.edge == 'top':
-        visualize(data, originalTopology)
-    elif args.v and args.edge == 'sim':
-        visualize(data, similarAttributes)
-    elif args.v:
-        visualize(data)
+    if args.v:
+        visualizer = Visualizer()
+        visualizer.visualize(data, EDGE_FUNCS[args.edge], split=args.split)
 
     if args.p:
         # SVM w/ Markov Cluster
