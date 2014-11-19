@@ -56,7 +56,7 @@ class Visualizer():
         OUTPUT_DIR = 'graphs'
         # Use spring layout for nice format
         pos = nx.spring_layout(graph)
-        pylab.figure(1)
+        pylab.figure()
         # Convert data to pylab input
         nodeColors = []
         nodeList = []

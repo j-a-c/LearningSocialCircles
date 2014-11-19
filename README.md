@@ -23,3 +23,5 @@ Flags:
   options are: 
   * top: Uses the original graph topology.
   * sim: Creates edges between similar users.
+  * tri: Creates edges between users with friends in common.
+  * combo: Uses both 'tri' and 'sim' to create edges.
