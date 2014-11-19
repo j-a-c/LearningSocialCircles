@@ -31,7 +31,7 @@ def statify(data, trim=False):
     friendMap = data.friendMap
 
     # Sample code to find feature intersection within a user's circles.
-    print 'Intersecting attrs:'
+    print 'Egonet stats:'
     for person in trainingMap:
         print '\tuserid', person, ', who has # friends:', len(friendMap[person]), 'and # circles', len(trainingMap[person])
         print '\tuserid\'s attributes:', data.featureMap[person]
@@ -41,6 +41,7 @@ def statify(data, trim=False):
             print '\t\tAttributes common for this egonet:', tooCommonAttrs
         attrs = _findIntersectionFeaturesPerCircle(trainingMap[person], featureMap, 0.25, tooCommonAttrs)
         # Exclude attributes the circle as a whole has in common
+        print '\t\t=Intersecting circle attributes:'
         for attr, circle in zip(attrs, trainingMap[person]):
             sortedAttr = sorted(attr.items(), key=lambda x:x[1], reverse=True)
             print '\t\t', len(circle), sortedAttr
