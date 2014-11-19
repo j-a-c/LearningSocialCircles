@@ -16,6 +16,9 @@ Flags:
 - -p Predict social circles.
 - -v Visualize data. By default uses original topology to construct graphs.
 - --split Split visualizations by circle.
+- --save Save output. Graphical output is saved to the folder 'graphs' in the
+  current directory.
+- --show Show output during visualization calculations.
 - --edge Select the edge function to use when visualizing data. Supported
   options are: 
   * top: Uses the original graph topology.

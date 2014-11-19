@@ -1,5 +1,6 @@
 import collections
 import networkx as nx
+import os
 import pylab
 
 """
@@ -9,6 +10,14 @@ def originalTopology(data, person1, person2):
     if person1 in data.friendMap[person2]:
         return True
     return False
+
+
+def friendsInCommon(data, person1, person2, threshold=1):
+    numFriendsInCommon = 0
+    for friend in data.friendMap[person1]:
+        if friend in data.friendMap[person2]:
+            numFriendsInCommon += 1
+    return numFriendsInCommon > threshold
 
 
 """
@@ -28,6 +37,9 @@ def similarAttributes(data, person1, person2, threshold=3):
         return True
     return False
 
+def topologyAndAttributes(data, person1, person2):
+    return similarAttributes(data, person1, person2) or friendsInCommon(data,
+            person1, person2)
 
 class Visualizer():
     def __init__(self):
@@ -41,6 +53,7 @@ class Visualizer():
         self.ORIG_COLOR = 'red'
 
     def createGraph(self, graph, title, origPerson, show, save):
+        OUTPUT_DIR = 'graphs'
         # Use spring layout for nice format
         pos = nx.spring_layout(graph)
         pylab.figure(1)
@@ -63,7 +76,10 @@ class Visualizer():
         # Add title
         pylab.title(title)
         if save:
-            None # TODO
+            if not os.path.exists(OUTPUT_DIR):
+                os.makedirs(OUTPUT_DIR)
+            savePath = os.path.join(OUTPUT_DIR, title + '.png')
+            pylab.savefig(savePath)
         if show:
             pylab.show()
 
@@ -142,7 +158,7 @@ class Visualizer():
                         if edgefunc(data, origPerson, person1):
                             graph.add_edge(origPerson, person1)
 
-                    graphTitle = origPerson + ', Circle:' + str(circleIndex) + '/' + str(len(trainingMap[origPerson]))
+                    graphTitle = origPerson + ', Circle ' + str(circleIndex) + '_' + str(len(trainingMap[origPerson]))
                     self.createGraph(graph, graphTitle, origPerson, show, save)
             else:
                 friendNotInCircles = []

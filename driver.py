@@ -3,8 +3,10 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from clfHelper import attributeAndValue
 from stats import statify
+from visualize import friendsInCommon
 from visualize import originalTopology
 from visualize import similarAttributes
+from visualize import topologyAndAttributes
 from visualize import Visualizer
 
 import argparse
@@ -241,10 +243,21 @@ if __name__ == '__main__':
     parser.add_argument('--edge', action='store', help='Select edge function')
     parser.add_argument('--split', action='store_true', help='Split \
             visualizations by circle.')
+    parser.add_argument('--save', action='store_true', help='Save output. \
+            Graphical output is saved to the folder \'graphs\' in the current \
+            directory.')
+    parser.add_argument('--show', action='store_true', help='Show output \
+            during visualization calculations.')
     args = parser.parse_args()
 
     # Validate arguments
-    EDGE_FUNCS = {'top': originalTopology, 'sim': similarAttributes, None: originalTopology}
+    EDGE_FUNCS = {
+            'top': originalTopology,
+            'sim': similarAttributes,
+            'tri': friendsInCommon,
+            'combo': topologyAndAttributes,
+            None: originalTopology
+    }
     if args.edge not in EDGE_FUNCS:
         print 'Invalid edge function:', args.edge
         print 'Allowable edge functions:', EDGE_FUNCS
@@ -327,7 +340,8 @@ if __name__ == '__main__':
     # Visualize data
     if args.v:
         visualizer = Visualizer()
-        visualizer.visualize(data, EDGE_FUNCS[args.edge], split=args.split)
+        visualizer.visualize(data, EDGE_FUNCS[args.edge], split=args.split,
+                save=args.save, show=args.show)
 
     if args.p:
         # SVM w/ Markov Cluster
