@@ -150,6 +150,9 @@ def sanityChecks(data):
     # Check friendMap
     sanity = sanity and (len(friendMap['0']) == 238)
     sanity = sanity and (len(friendMap['850']) == 248)
+    # Make sure a person is not included in their own egonet
+    for person in friendMap:
+        sanity = sanity and (person not in friendMap[person])
     # Check originalPeople
     sanity = sanity and (len(originalPeople) == 110)
     if not sanity:
