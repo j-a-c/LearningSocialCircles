@@ -2,6 +2,21 @@ import collections
 import numpy
 import pylab
 
+def _reportHistData(title, data):
+
+    print title
+    pylab.title(title)
+    pylab.hist(data, 15)
+    pylab.plot()
+    pylab.show()
+    print '\tAvg:', numpy.average(data)
+    print '\tStd:', numpy.std(data)
+    print '\tMin:', min(data)
+    print '\t25%:', numpy.percentile(data, 25)
+    print '\t50%:', numpy.percentile(data, 50)
+    print '\t75%:', numpy.percentile(data, 75)
+    print '\tMax:', max(data)
+
 """
 Entry point for calculating statistics.
 """
@@ -23,46 +38,43 @@ def statify(data):
 
     # Calculate useful data
     circleSizes = []
+    circleSizesNorm = []
     circleDiameters = []
+    circleDiametersNorm = []
+    numClusterNormalizeds = []
+    avgClusterNormalizeds = []
 
     for userid in trainingMap:
+        numClusterNormalized = 0.0
+        avgClusterNormalized = 0.0
+        numFriends = len(friendMap[userid])
         for circle in trainingMap[userid]:
             # Size of circle
             circleSizes.append(len(circle))
+            circleSizesNorm.append(float(len(circle))/ numFriends)
             # Diameter of the circle )
-            circleDiameters.append(_diameterOf(circle, friendMap))
+            diameter = _diameterOf(circle, friendMap)
+            circleDiameters.append(diameter)
+            circleDiametersNorm.append(float(diameter) / numFriends)
+            #
+            numClusterNormalized += 1
+            #
+            avgClusterNormalized += len(circle)
+
+
+        numClusterNormalized /= numFriends
+        avgClusterNormalized /= numFriends
+        numClusterNormalizeds.append(numClusterNormalized)
+        avgClusterNormalizeds.append(numClusterNormalized)
 
 
     # Report data
-
-    # Size of circle
-    print 'Circle Size Data:'
-    pylab.title('Histogram of Circle Sizes')
-    pylab.hist(circleSizes, 15)
-    pylab.plot()
-    pylab.show()
-    print '\tAvg:', numpy.average(circleSizes)
-    print '\tStd:', numpy.std(circleSizes)
-    print '\tMin:', min(circleSizes)
-    print '\t25%:', numpy.percentile(circleSizes, 25)
-    print '\t50%:', numpy.percentile(circleSizes, 50)
-    print '\t75%:', numpy.percentile(circleSizes, 75)
-    print '\tMax:', max(circleSizes)
-
-
-    # Diameter of circles
-    print 'Circle Diameter Data:'
-    pylab.title('Histogram of Circle Diameters')
-    pylab.hist(circleDiameters, 15)
-    pylab.plot()
-    pylab.show()
-    print '\tAvg:', numpy.average(circleDiameters)
-    print '\tStd:', numpy.std(circleDiameters)
-    print '\tMin:', min(circleDiameters)
-    print '\t25%:', numpy.percentile(circleDiameters, 25)
-    print '\t50%:', numpy.percentile(circleDiameters, 50)
-    print '\t75%:', numpy.percentile(circleDiameters, 75)
-    print '\tMax:', max(circleDiameters)
+    _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
+    _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
+    _reportHistData('Normalized circle sizes:', circleSizesNorm)
+    _reportHistData('Normalized circle diameters:', circleDiametersNorm)
+    _reportHistData('Circle Sizes:', circleSizes)
+    _reportHistData('Circle Diameters:', circleDiameters)
 
 
 """
