@@ -10,6 +10,7 @@ def originalTopology(data, person1, person2):
         return True
     return False
 
+
 """
 Returns true if the two people have more than 'threshold' attributes in common.
 Does not include the amount of friends in common.
@@ -26,6 +27,14 @@ def similarAttributes(data, person1, person2, threshold=3):
     if numberAttributesInCommon > threshold:
         return True
     return False
+
+
+"""
+Returns true if the two people have more than 'thres'
+"""
+def topologyAttributes(data, person1, person2):
+    None
+
 
 """
 Visualizes a friend map given a data pack and function which determines if an
