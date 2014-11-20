@@ -12,7 +12,7 @@ def originalTopology(data, person1, person2):
     return False
 
 
-def friendsInCommon(data, person1, person2, threshold=1):
+def friendsInCommon(data, person1, person2, threshold=3):
     numFriendsInCommon = 0
     for friend in data.friendMap[person1]:
         if friend in data.friendMap[person2]:
