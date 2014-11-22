@@ -8,7 +8,10 @@ from visualize import originalTopology
 from visualize import similarAttributes
 from visualize import topologyAndAttributes
 from visualize import Visualizer
+from userData import Persons
+from kmeans import KMeans
 
+import similarityCalculator
 import argparse
 import collections
 import os
@@ -23,7 +26,7 @@ class Data:
         self.featureMap = None
         self.featureList = None
         self.trainingMap = None
-
+        self.persons = Persons()
 
 """
 Each file in this directory contains the ego-network of a
@@ -47,12 +50,14 @@ to consider.
 def loadEgoNets(directory):
     friendMap = collections.defaultdict(set)
     originalPeople = []
-
+    persons = Persons()
+    
     for egonetFile in os.listdir(directory):
 
         currentPerson = egonetFile[:egonetFile.find('.')]
         originalPeople.append(currentPerson)
-
+        persons.addOriginalPerson(currentPerson)
+               
         egonetFilePath = os.path.join(directory, egonetFile)
 
         for line in open(egonetFilePath):
@@ -61,16 +66,23 @@ def loadEgoNets(directory):
 
             friendMap[currentPerson].add(currentFriend)
             friendMap[currentFriend].add(currentPerson)
-
+            persons.getPerson(currentPerson).addFriend(currentFriend)
+            persons.getPerson(currentFriend).addFriend(currentPerson)
+            
             friends = line[1].strip().split()
 
             for friend in friends:
                 friendMap[currentFriend].add(friend)
                 friendMap[friend].add(currentFriend)
-
+                persons.getPerson(currentFriend).addFriend(friend)
+                persons.getPerson(friend).addFriend(currentFriend)
+            
                 friendMap[currentPerson].add(friend)
                 friendMap[friend].add(currentPerson)
-    return friendMap, originalPeople
+                persons.getPerson(currentPerson).addFriend(friend)
+                persons.getPerson(friend).addFriend(currentPerson)
+            
+    return friendMap, originalPeople, persons
 
 
 """
@@ -114,7 +126,7 @@ feature/value mappings.
 
 Returns a map mappings UserId to a map of features.
 """
-def loadFeatures(filename):
+def loadFeatures(filename, persons = None):
     featureMap = collections.defaultdict(dict)
     for line in open(filename):
         parts = line.strip().split()
@@ -123,6 +135,8 @@ def loadFeatures(filename):
             key = part[0:part.rfind(';')]
             value = part[part.rfind(';')+1:]
             featureMap[currentPerson][key] = value
+            if persons != None:
+                persons.getPerson(currentPerson).addFeature(key, value)
     return featureMap
 
 
@@ -148,24 +162,27 @@ def sanityChecks(data):
     featureMap = data.featureMap
     featureList = data.featureList
     trainingMap = data.trainingMap
-
+    persons = data.persons
+    
     sanity = True
 
     # Check friendMap
-    sanity = sanity and (len(friendMap['0']) == 238)
-    sanity = sanity and (len(friendMap['850']) == 248)
+    sanity = sanity and (len(friendMap['0']) == 238) and (len(persons.getPerson('0').getFriends()) == 238)
+    sanity = sanity and (len(friendMap['850']) == 248) and (len(persons.getPerson('850').getFriends()) == 248)
     # Make sure a person is not included in their own egonet
     for person in friendMap:
-        sanity = sanity and (person not in friendMap[person])
+        sanity = sanity and (person not in friendMap[person]) and (person not in persons.getPerson(person).getFriends())
     # Check originalPeople
-    sanity = sanity and (len(originalPeople) == 110)
+    sanity = sanity and (len(originalPeople) == 110) and (len(persons.getOriginalPersons()) == 110)
     if not sanity:
         print 'Egonets not imported correctly.'
         return sanity
 
     # Check featureMap
-    sanity = sanity and (featureMap['0']['last_name'] == '0')
-    sanity = sanity and (featureMap['18714']['work;employer;name'] == '12723')
+    sanity = sanity and (featureMap['0']['last_name'] == '0') and \
+                        (persons.getPerson('0').getFeature('last_name')=='0')
+    sanity = sanity and (featureMap['18714']['work;employer;name'] == '12723') and \
+                        (persons.getPerson('18714').getFeature('work;employer;name') == '12723')
     if not sanity:
         print 'Features not imported correctly.'
         return sanity
@@ -223,7 +240,24 @@ def printMetricCommand(realOutput, testOutput):
     print '\nEvaluate using:'
     print 'python socialCircles_metric.py', realOutput, testOutput
 
-
+def k_means_clustering(data):
+    attribute_clusters = {}
+    attribute_and_friendship_clusters = {}
+    k_means = KMeans(data.persons, similarityCalculator.simiarity_according_to_attributes)
+    
+    for personID in data.persons.getOriginalPersons():
+        clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
+        attribute_clusters[personID] = clusters
+                
+    k_means.setSimilarityCalculator(similarityCalculator.simiarity_according_to_attributes_and_friendship)
+    for personID in data.persons.getOriginalPersons():
+        clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
+        attribute_and_friendship_clusters[personID] = clusters
+    
+    visualizer = Visualizer()
+    for personID in data.persons.getOriginalPersons():
+        visualizer.visualizeClusters( attribute_clusters[personID] )
+        visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
 """
 Not all friends have to be in a circle.
 Circles may be disjoint, overlap, or hierarchically nested.
@@ -273,10 +307,10 @@ if __name__ == '__main__':
     data = Data()
 
     # Load friend map.
-    data.friendMap, data.originalPeople = loadEgoNets(EGONET_DIR)
+    data.friendMap, data.originalPeople, data.persons = loadEgoNets(EGONET_DIR)
 
     # Load features.
-    data.featureMap = loadFeatures(FEATURE_FILE)
+    data.featureMap = loadFeatures(FEATURE_FILE, data.persons)
 
     # Load feature list.
     data.featureList = loadFeatureList(FEATURE_LIST_FILE)
@@ -288,7 +322,10 @@ if __name__ == '__main__':
     if not sanityChecks(data):
         print 'Data was not imported in the correct format.'
         exit()
-
+    
+    k_means_clustering(data)
+    #exit()
+    
     """
     # All friends in one circle submission.
     # This is just a test to check our input against sample_submission.csv.

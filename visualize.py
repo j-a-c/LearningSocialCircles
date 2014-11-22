@@ -52,23 +52,13 @@ class Visualizer():
         # Color for the original person
         self.ORIG_COLOR = 'red'
 
-    def createGraph(self, graph, title, origPerson, show, save):
+    def plotGraph(self, graph, nodeList, nodeColors, title, save, show):
         OUTPUT_DIR = 'graphs'
+        
         # Use spring layout for nice format
         pos = nx.spring_layout(graph)
         pylab.figure()
-        # Convert data to pylab input
-        nodeColors = []
-        nodeList = []
-        for nodeInfo in graph.nodes(data=True):
-            nodeList.append(nodeInfo[0])
-            if 'fillcolor' in nodeInfo[1]:
-                color = nodeInfo[1]['fillcolor']
-                nodeColors.append(color)
-            elif nodeInfo[0] == origPerson:
-                nodeColors.append(self.ORIG_COLOR)
-            else:
-                nodeColors.append(self.NO_CIRCLE)
+        
         # Draw pylab compatible graph
         nx.draw_networkx(graph, pos, nodelist=nodeList,
                 node_color=nodeColors, with_labels=False, node_size=60,
@@ -83,7 +73,21 @@ class Visualizer():
         if show:
             pylab.show()
 
-
+    def createGraph(self, graph, title, origPerson, show, save):
+        # Convert data to pylab input
+        nodeColors = []
+        nodeList = []
+        for nodeInfo in graph.nodes(data=True):
+            nodeList.append(nodeInfo[0])
+            if 'fillcolor' in nodeInfo[1]:
+                color = nodeInfo[1]['fillcolor']
+                nodeColors.append(color)
+            elif nodeInfo[0] == origPerson:
+                nodeColors.append(self.ORIG_COLOR)
+            else:
+                nodeColors.append(self.NO_CIRCLE)
+                
+        self.plotGraph(graph, nodeList, nodeColors, title, save, show)
     """
     Visualizes a friend map given a data pack and function which determines if an
     edge exists between two people. The default edge function is to use the
@@ -210,3 +214,31 @@ class Visualizer():
                 self.createGraph(graph, graphTitle, origPerson, show, save)
 
         print 'Ending visualization.'
+        
+    def visualizeClusters(self, clusters, title='Cluster', save=False, show=True):
+        # Colors we support
+        colors = ['blue', 'green', 'yellow', 'orange', 'purple',
+                'indigo', 'magenta', 'pink', 'crimson', 'firebrick', 'chartreuse',
+                'gold', 'mistyrose', 'lightsalmon2', 'peru', 'limegreen',
+                'khaki1', 'grey73', 'darkorange2', 'cadetblue4', 'aliceblue',
+                'mediumseagreen']
+        cluster_number = 0
+        graph = nx.Graph()
+        
+        for clusterID in clusters:
+            for friend in clusters[clusterID]:
+                graph.add_node(friend, style='filled', fillcolor=colors[cluster_number%len(colors)])
+                if clusterID != friend:
+                    graph.add_edge(clusterID, friend)
+            cluster_number += 1
+        
+        # Convert data to pylab input
+        nodeColors = []
+        nodeList = []
+        for nodeInfo in graph.nodes(data=True):
+            nodeList.append(nodeInfo[0])
+            nodeColors.append(nodeInfo[1]['fillcolor'])
+                
+        self.plotGraph(graph, nodeList, nodeColors, title, save, show)
+            
+    
