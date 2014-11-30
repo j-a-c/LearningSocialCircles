@@ -240,24 +240,27 @@ def printMetricCommand(realOutput, testOutput):
     print '\nEvaluate using:'
     print 'python socialCircles_metric.py', realOutput, testOutput
 
-def k_means_clustering(data):
+def k_means_clustering(data, show=False):
     attribute_clusters = {}
     attribute_and_friendship_clusters = {}
     k_means = KMeans(data.persons, similarityCalculator.simiarity_according_to_attributes)
-    
-    for personID in data.persons.getOriginalPersons():
+
+    for personID in data.originalPeople:
         clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
         attribute_clusters[personID] = clusters
-                
+
     k_means.setSimilarityCalculator(similarityCalculator.simiarity_according_to_attributes_and_friendship)
-    for personID in data.persons.getOriginalPersons():
+    for personID in data.originalPeople:
         clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
         attribute_and_friendship_clusters[personID] = clusters
-    
-    visualizer = Visualizer()
-    for personID in data.persons.getOriginalPersons():
-        visualizer.visualizeClusters( attribute_clusters[personID] )
-        visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
+
+    if show:
+        visualizer = Visualizer()
+        for personID in data.persons.getOriginalPersons():
+            visualizer.visualizeClusters( attribute_clusters[personID] )
+            visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
+
+    return attribute_clusters, attribute_and_friendship_clusters
 """
 Not all friends have to be in a circle.
 Circles may be disjoint, overlap, or hierarchically nested.
@@ -271,7 +274,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process social circle data.')
     parser.add_argument('-s', action='store_true', help='Compute statistics.')
     parser.add_argument('--trim', action='store_true', help='Trim common data.')
-    parser.add_argument('-p', action='store_true', help='Predict social circles.')
+    parser.add_argument('-p', action='store', help='Predict social circles \
+            using the given predictor. Supported predictors are \'kmeans\' and \
+            \'mcl\'.')
     parser.add_argument('-v', action='store_true', help='Visualize data. By \
             default uses original topology to construct graphs.')
     parser.add_argument('--edge', action='store', help='Select edge function')
@@ -322,21 +327,6 @@ if __name__ == '__main__':
     if not sanityChecks(data):
         print 'Data was not imported in the correct format.'
         exit()
-    
-    k_means_clustering(data)
-    #exit()
-    
-    """
-    # All friends in one circle submission.
-    # This is just a test to check our input against sample_submission.csv.
-    # To run: 'socialCircles_metric.py sample_submission.csv one_circle.csv'
-    oneCircleMap = {}
-    for person in originalPeople:
-        if not person in trainingMap:
-            oneCircleMap[person] = friendMap[person]
-    writeSubmission('one_circle.csv', oneCircleMap, True)
-    printMetricCommand('sample_submission.csv', 'one_circle.csv')
-    """
 
     # Calculate general stats from data.
     if args.s and args.trim:
@@ -348,32 +338,6 @@ if __name__ == '__main__':
     for key in data.trainingMap:
         trainingPeople.append(key)
 
-
-    """
-    # Markov Cluster Algorithm
-    mclCirclMap = {}
-    counter = 1
-    for currentPerson in trainingPeople:
-        # Report progress
-        print counter, '/', len(trainingPeople)
-        counter += 1
-
-        # Perform actual MCL calculation
-        mclCircles = mcl(currentPerson, friendMap)
-        mclTotalPeople = 0
-        actualTotalPeople = 0
-        for circle in mclCircles:
-            mclTotalPeople += len(circle)
-        for circle in trainingMap[currentPerson]:
-            actualTotalPeople += len(circle)
-
-        mclCirclMap[currentPerson] = mclCircles
-        #print 'Num MCL circles:', len(mclCircles), 'Actual:', len(trainingMap[currentPerson])
-        #print 'MCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
-    writeSubmission('mcl_circle.csv', mclCirclMap)
-    writeSubmission('real_circle.csv', trainingMap)
-    """
-
     # Visualize data
     if args.v:
         visualizer = Visualizer()
@@ -381,6 +345,89 @@ if __name__ == '__main__':
                 save=args.save, show=args.show)
 
     if args.p:
+        # Select prediction method
+        if args.p == 'kmeans':
+            print 'Using k-means clustering metric.'
+            attribute_clusters, attribute_and_friendship_clusters = k_means_clustering(data, args.show)
+
+            real_training_data = 'real_training_data.csv'
+            kmeans_attrs = 'kmeans_attrs.csv'
+            kmeans_attrs_friends = 'kmeans_attrs_friends.csv'
+            kmeans_kaggle_attrs = 'kmeans_kaggle_attrs.csv'
+            kmeans_kaggle_attrs_friends = 'kmeans_kaggle_attrs_friends.csv'
+
+
+            writeSubmission(real_training_data, data.trainingMap)
+
+            # Validation tests
+            writeSubmission(kmeans_attrs, {k:attribute_clusters[k] for k in data.trainingMap})
+            writeSubmission(kmeans_attrs_friends, {k:attribute_and_friendship_clusters[k] for k in data.trainingMap})
+
+            # Kaggle submissions
+            writeSubmission(kmeans_kaggle_attrs, {k:attribute_clusters[k] for k in
+                data.originalPeople if k not in data.trainingMap})
+            writeSubmission(kmeans_kaggle_attrs_friends,
+                    {k:attribute_and_friendship_clusters[k] for k in
+                        data.originalPeople if k not in data.trainingMap})
+
+            printMetricCommand(real_training_data, kmeans_attrs)
+            printMetricCommand(real_training_data, kmeans_attrs_friends)
+            print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends
+
+        if args.p == 'mcl':
+            print 'Using Markov clustering algorithm.'
+            # Markov Cluster Algorithm
+            mclCirclMap = {}
+            counter = 1
+            for currentPerson in trainingPeople:
+                # Report progress
+                print counter, '/', len(trainingPeople)
+                counter += 1
+
+                # Perform actual MCL calculation
+                mclCircles = mcl(currentPerson, data)
+                mclTotalPeople = 0
+                actualTotalPeople = 0
+                for circle in mclCircles:
+                    mclTotalPeople += len(circle)
+                for circle in data.trainingMap[currentPerson]:
+                    actualTotalPeople += len(circle)
+
+                mclCirclMap[currentPerson] = mclCircles
+                #print 'Num MCL circles:', len(mclCircles), 'Actual:', len(trainingMap[currentPerson])
+                #print 'MCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
+
+            mcl_training = 'mcl_training.csv'
+            real_training = 'real_training_data.csv'
+
+            writeSubmission(mcl_training, data.mclCirclMap)
+            writeSubmission(real_training, data.trainingMap)
+            printMetricCommand(real_training, mcl_training)
+
+        # Default is 'All friends in one cricle' metric'.
+        else:
+            print 'Using one-circle metric.'
+            # All friends in one circle submission.
+            # This is just a test to check our input against sample_submission.csv.
+            # To run: 'socialCircles_metric.py sample_submission.csv one_circle.csv'
+            oneCircleMap = {}
+            for person in data.originalPeople:
+                if not person in data.trainingMap:
+                    oneCircleMap[person] = data.friendMap[person]
+            writeSubmission('one_circle.csv', oneCircleMap, True)
+            printMetricCommand('sample_submission.csv', 'one_circle.csv')
+
+
+
+        """
+        TODO Clean up lines below here...
+        """
+
+        quit()
+
+
+
+
         # SVM w/ Markov Cluster
         svmMclCircleMap = {}
 

@@ -13,7 +13,10 @@ Flags:
 - -s Compute statistics on data.
 - --trim Output data common per egonet. This set will be ignored when
   displaying intersection attributes.
-- -p Predict social circles.
+- -p Predict social circles using the specified predictor. Supported
+  predictors:
+  * kmeans - K-means clustering
+  * mcl - Markvoc clustering algorithm
 - -v Visualize data. By default uses original topology to construct graphs.
 - --split Split visualizations by circle.
 - --save Save output. Graphical output is saved to the folder 'graphs' in the
