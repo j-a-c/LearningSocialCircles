@@ -376,6 +376,7 @@ if __name__ == '__main__':
 
         if args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
+            print 'Using edge function:', args.edge
             # Markov Cluster Algorithm
             mclCirclMap = {}
             counter = 1
@@ -385,7 +386,25 @@ if __name__ == '__main__':
                 counter += 1
 
                 # Perform actual MCL calculation
-                mclCircles = mcl(currentPerson, data)
+                mclCircles = None
+                if args.edge:
+                    # Build weights
+                    weights = collections.defaultdict(dict)
+                    for friend1 in data.friendMap[currentPerson]:
+                        weight = EDGE_FUNCS[args.edge](data, friend1, currentPerson)
+                        weights[friend1][currentPerson] = weight
+                        weights[currentPerson][friend1] = weight
+
+                        for friend2 in data.friendMap[currentPerson]:
+                            weight = EDGE_FUNCS[args.edge](data, friend1, friend2)
+                            weights[friend1][friend2] = weight
+                            weights[friend2][friend1] = weight
+
+
+
+                    mclCircles = mcl(currentPerson, data, weights)
+                else:
+                    mclCircles = mcl(currentPerson, data)
                 mclTotalPeople = 0
                 actualTotalPeople = 0
                 for circle in mclCircles:

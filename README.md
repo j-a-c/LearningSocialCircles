@@ -16,7 +16,7 @@ Flags:
 - -p Predict social circles using the specified predictor. Supported
   predictors:
   * kmeans - K-means clustering
-  * mcl - Markvoc clustering algorithm
+  * mcl - Markvoc clustering algorithm. Can be combined with --edge parameter.
 - -v Visualize data. By default uses original topology to construct graphs.
 - --split Split visualizations by circle.
 - --save Save output. Graphical output is saved to the folder 'graphs' in the
