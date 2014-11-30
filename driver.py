@@ -400,7 +400,7 @@ if __name__ == '__main__':
             mcl_training = 'mcl_training.csv'
             real_training = 'real_training_data.csv'
 
-            writeSubmission(mcl_training, data.mclCirclMap)
+            writeSubmission(mcl_training, mclCirclMap)
             writeSubmission(real_training, data.trainingMap)
             printMetricCommand(real_training, mcl_training)
 
