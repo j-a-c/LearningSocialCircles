@@ -2,6 +2,8 @@ import collections
 import numpy
 import pylab
 
+from sets import Set
+
 def _reportHistData(title, data):
 
     print title
@@ -78,6 +80,9 @@ def statify(data, trim=False, show=False):
         avgClusterNormalized = 0.0
         numFriends = len(friendMap[userid])
         numFriendsAll.append(numFriends)
+
+        different_profile_attrs = Set()
+
         for circle in trainingMap[userid]:
             # Size of circle
             circleSizes.append(len(circle))
@@ -93,6 +98,10 @@ def statify(data, trim=False, show=False):
         # Count the number of triangles in the graph.
         numTriangles = 0
         for person1 in data.friendMap[userid]:
+            # Update profile attributes
+            for feature in data.featureMap[person1]:
+                different_profile_attrs.add(data.featureMap[person1][feature])
+
             for person2 in data.friendMap[userid]:
                 for friend in data.friendMap[person1]:
                     if friend in data.friendMap[person2]:
@@ -107,8 +116,10 @@ def statify(data, trim=False, show=False):
         numClusterNormalizeds.append(numClusterNormalized)
         avgClusterNormalizeds.append(numClusterNormalized)
 
+        diversity = (1.0 * len(different_profile_attrs)) / numFriends
+
         # Update attributes to return
-        newAttributes = [numTriangles, numFriendsAll]
+        newAttributes = [numTriangles, numFriends, diversity]
         attributes.append(newAttributes)
 
 
