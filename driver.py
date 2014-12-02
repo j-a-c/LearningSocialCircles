@@ -329,10 +329,8 @@ if __name__ == '__main__':
         exit()
 
     # Calculate general stats from data.
-    if args.s and args.trim:
-        statify(data, True)
-    elif args.s:
-        statify(data)
+    if args.s:
+        stat_attributes, stat_values = statify(data, args.trim, args.show)
 
     trainingPeople = []
     for key in data.trainingMap:

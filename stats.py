@@ -29,8 +29,15 @@ Entry point for calculating statistics.
 Data = the input data pack.
 trim = true if we should not consider attributes a majority of the group has in
 common.
+show = true if the resulting plots should be shown.
+
+Returns the attributes calculated and a list of possible features to predict.
+The first item in the prediction list is the number of circles.
 """
-def statify(data, trim=False):
+def statify(data, trim=False, show=False):
+    attributes = []
+    NUM_CIRCLE_INDEX = 0
+    values = [[]]
 
     trainingMap = data.trainingMap
     featureMap = data.featureMap
@@ -65,6 +72,8 @@ def statify(data, trim=False):
     numTrianglesAll = []
 
     for userid in trainingMap:
+        values[NUM_CIRCLE_INDEX].append(len(trainingMap[userid]))
+
         numClusterNormalized = 0.0
         avgClusterNormalized = 0.0
         numFriends = len(friendMap[userid])
@@ -98,17 +107,24 @@ def statify(data, trim=False):
         numClusterNormalizeds.append(numClusterNormalized)
         avgClusterNormalizeds.append(numClusterNormalized)
 
+        # Update attributes to return
+        newAttributes = [numTriangles, numFriendsAll]
+        attributes.append(newAttributes)
 
-    # Report data
-    _reportXYPlotData(numFriendsAll, numClustersNotNormalized, 'Friends vs Clusters')
-    _reportXYPlotData(numTrianglesAll, numClustersNotNormalized, 'Triangles vs Clusters')
-    _reportXYPlotData(numTrianglesAll, numFriendsAll, 'Triangles vs Friends')
-    _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
-    _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
-    _reportHistData('Normalized circle sizes:', circleSizesNorm)
-    _reportHistData('Normalized circle diameters:', circleDiametersNorm)
-    _reportHistData('Circle Sizes:', circleSizes)
-    _reportHistData('Circle Diameters:', circleDiameters)
+
+    if show:
+        # Report data
+        _reportXYPlotData(numFriendsAll, numClustersNotNormalized, 'Friends vs Clusters')
+        _reportXYPlotData(numTrianglesAll, numClustersNotNormalized, 'Triangles vs Clusters')
+        _reportXYPlotData(numTrianglesAll, numFriendsAll, 'Triangles vs Friends')
+        _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
+        _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
+        _reportHistData('Normalized circle sizes:', circleSizesNorm)
+        _reportHistData('Normalized circle diameters:', circleDiametersNorm)
+        _reportHistData('Circle Sizes:', circleSizes)
+        _reportHistData('Circle Diameters:', circleDiameters)
+
+    return attributes, values
 
 
 def _findCommonFeaturesPerEgoNet(userid, data, percent=0.5):
