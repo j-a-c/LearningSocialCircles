@@ -86,7 +86,7 @@ class KMeans(object):
                     minimum_similarity = similarity
                 if similarity > maximum_similarity:
                     maximum_similarity = similarity
-            print('max sim: ' + str(maximum_similarity) + ' min sim: ' + str(minimum_similarity))
+            #print('max sim: ' + str(maximum_similarity) + ' min sim: ' + str(minimum_similarity))
                     
             #if similarity difference is more than a threshold, drop friends with 
             #small similarity from circle/cluster

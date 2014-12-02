@@ -295,6 +295,15 @@ def splitIntoTrainingAndTestSets(trainingPeople, percent=0.5):
     return trainFromTraining, testFromTraining
 
 
+def _convert_kmeans_format(clusters):
+    clusters_formatted = {}
+    for original_person in clusters:
+        circles = []
+        for centroid in clusters[original_person]:
+            circles.append( clusters[original_person][centroid] )
+        clusters_formatted[original_person] = circles
+    return clusters_formatted
+    
 """
 Not all friends have to be in a circle.
 Circles may be disjoint, overlap, or hierarchically nested.
@@ -409,30 +418,40 @@ if __name__ == '__main__':
         if args.p == 'kmeans':
             print 'Using k-means clustering metric.'
             attribute_clusters, attribute_and_friendship_clusters, weighted_attribute_and_friendship_clusters = k_means_clustering(data, featureWeightMap, args.show)
-
+            
+            attribute_clusters = _convert_kmeans_format(attribute_clusters)
+            attribute_and_friendship_clusters = _convert_kmeans_format(attribute_and_friendship_clusters)
+            weighted_attribute_and_friendship_clusters = _convert_kmeans_format(weighted_attribute_and_friendship_clusters)
+            
             real_training_data = 'real_training_data.csv'
             kmeans_attrs = 'kmeans_attrs.csv'
             kmeans_attrs_friends = 'kmeans_attrs_friends.csv'
+            kmeans_weighted_attrs_friends = 'kmeans_weighted_attrs_friends.csv'
             kmeans_kaggle_attrs = 'kmeans_kaggle_attrs.csv'
             kmeans_kaggle_attrs_friends = 'kmeans_kaggle_attrs_friends.csv'
-
+            kmeans_kaggle_weighted_attrs_friends = 'kmeans_kaggle_weighted_attrs_friends.csv'
 
             writeSubmission(real_training_data, data.trainingMap)
-
+            #print(attribute_clusters['239'])
             # Validation tests
             writeSubmission(kmeans_attrs, {k:attribute_clusters[k] for k in data.trainingMap})
             writeSubmission(kmeans_attrs_friends, {k:attribute_and_friendship_clusters[k] for k in data.trainingMap})
-
+            writeSubmission(kmeans_weighted_attrs_friends, {k:weighted_attribute_and_friendship_clusters[k] for k in data.trainingMap})
+            
             # Kaggle submissions
             writeSubmission(kmeans_kaggle_attrs, {k:attribute_clusters[k] for k in
                 data.originalPeople if k not in data.trainingMap})
             writeSubmission(kmeans_kaggle_attrs_friends,
                     {k:attribute_and_friendship_clusters[k] for k in
                         data.originalPeople if k not in data.trainingMap})
-
+            writeSubmission(kmeans_kaggle_weighted_attrs_friends,
+                    {k:weighted_attribute_and_friendship_clusters[k] for k in
+                        data.originalPeople if k not in data.trainingMap})
+            
             printMetricCommand(real_training_data, kmeans_attrs)
             printMetricCommand(real_training_data, kmeans_attrs_friends)
-            print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends
+            printMetricCommand(real_training_data, kmeans_weighted_attrs_friends)
+            print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends, kmeans_kaggle_weighted_attrs_friends
 
         if args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
