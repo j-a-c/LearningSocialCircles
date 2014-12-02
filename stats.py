@@ -2,6 +2,8 @@ import collections
 import numpy
 import pylab
 
+from sets import Set
+
 def _reportHistData(title, data):
 
     print title
@@ -17,14 +19,27 @@ def _reportHistData(title, data):
     print '\t75%:', numpy.percentile(data, 75)
     print '\tMax:', max(data)
 
+def _reportXYPlotData(x, y, title):
+    pylab.plot(x, y, 'ro')
+    pylab.title(title)
+    pylab.show()
+
+
 """
 Entry point for calculating statistics.
 
 Data = the input data pack.
 trim = true if we should not consider attributes a majority of the group has in
 common.
+show = true if the resulting plots should be shown.
+
+Returns the attributes calculated and a list of possible features to predict.
+The first item in the prediction list is the number of circles.
 """
-def statify(data, trim=False):
+def statify(data, trim=False, show=False):
+    attributes = []
+    NUM_CIRCLE_INDEX = 0
+    values = [[]]
 
     trainingMap = data.trainingMap
     featureMap = data.featureMap
@@ -48,17 +63,26 @@ def statify(data, trim=False):
 
 
     # Calculate useful data
+    numFriendsAll = []
     circleSizes = []
     circleSizesNorm = []
     circleDiameters = []
     circleDiametersNorm = []
     numClusterNormalizeds = []
     avgClusterNormalizeds = []
+    numClustersNotNormalized = []
+    numTrianglesAll = []
 
     for userid in trainingMap:
+        values[NUM_CIRCLE_INDEX].append(len(trainingMap[userid]))
+
         numClusterNormalized = 0.0
         avgClusterNormalized = 0.0
         numFriends = len(friendMap[userid])
+        numFriendsAll.append(numFriends)
+
+        different_profile_attrs = Set()
+
         for circle in trainingMap[userid]:
             # Size of circle
             circleSizes.append(len(circle))
@@ -67,25 +91,51 @@ def statify(data, trim=False):
             diameter = _diameterOf(circle, friendMap)
             circleDiameters.append(diameter)
             circleDiametersNorm.append(float(diameter) / numFriends)
-            #
+            # Update the number of clusters in the graph.
             numClusterNormalized += 1
-            #
+            # Update the stat for the size of cluster in the graph.
             avgClusterNormalized += len(circle)
+        # Count the number of triangles in the graph.
+        numTriangles = 0
+        for person1 in data.friendMap[userid]:
+            # Update profile attributes
+            for feature in data.featureMap[person1]:
+                different_profile_attrs.add(data.featureMap[person1][feature])
 
+            for person2 in data.friendMap[userid]:
+                for friend in data.friendMap[person1]:
+                    if friend in data.friendMap[person2]:
+                        numTriangles += 1
+        # We counted each triangle three times.
+        numTriangles /= 3
+        numTrianglesAll.append(numTriangles)
 
+        numClustersNotNormalized.append(numClusterNormalized)
         numClusterNormalized /= numFriends
         avgClusterNormalized /= numFriends
         numClusterNormalizeds.append(numClusterNormalized)
         avgClusterNormalizeds.append(numClusterNormalized)
 
+        diversity = (1.0 * len(different_profile_attrs)) / numFriends
 
-    # Report data
-    _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
-    _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
-    _reportHistData('Normalized circle sizes:', circleSizesNorm)
-    _reportHistData('Normalized circle diameters:', circleDiametersNorm)
-    _reportHistData('Circle Sizes:', circleSizes)
-    _reportHistData('Circle Diameters:', circleDiameters)
+        # Update attributes to return
+        newAttributes = [numTriangles, numFriends, diversity]
+        attributes.append(newAttributes)
+
+
+    if show:
+        # Report data
+        _reportXYPlotData(numFriendsAll, numClustersNotNormalized, 'Friends vs Clusters')
+        _reportXYPlotData(numTrianglesAll, numClustersNotNormalized, 'Triangles vs Clusters')
+        _reportXYPlotData(numTrianglesAll, numFriendsAll, 'Triangles vs Friends')
+        _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
+        _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
+        _reportHistData('Normalized circle sizes:', circleSizesNorm)
+        _reportHistData('Normalized circle diameters:', circleDiametersNorm)
+        _reportHistData('Circle Sizes:', circleSizes)
+        _reportHistData('Circle Diameters:', circleDiameters)
+
+    return attributes, values
 
 
 def _findCommonFeaturesPerEgoNet(userid, data, percent=0.5):

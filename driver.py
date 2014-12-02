@@ -1,6 +1,10 @@
 from mcl import mcl
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import BayesianRidge
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Ridge
 from clfHelper import attributeAndValue
 from stats import statify
 from visualize import friendsInCommon
@@ -270,7 +274,30 @@ def k_means_clustering(data, featureWeightMap, show=False):
             visualizer.visualizeClusters( attribute_clusters[personID] )
             visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
 
+<<<<<<< HEAD
     return attribute_clusters, attribute_and_friendship_clusters, weighted_attribute_and_friendship_clusters
+=======
+    return attribute_clusters, attribute_and_friendship_clusters
+
+
+"""
+Splits an input list into training and testing sets. percent is the percent of
+the input list to be used as the training set.
+
+Return value is the training list and the testing list.
+"""
+def splitIntoTrainingAndTestSets(trainingPeople, percent=0.5):
+    # Shuffle training people and use half for test, half for training.
+    print 'Shuffling original training people.'
+    random.shuffle(trainingPeople)
+    trainingEnd = int(len(trainingPeople) * percent)
+    print 'Using', trainingEnd, 'people for training.'
+    print 'Using', len(trainingPeople) - trainingEnd, 'people for testing.'
+    trainFromTraining = trainingPeople[0:trainingEnd]
+    testFromTraining = trainingPeople[trainingEnd:]
+    return trainFromTraining, testFromTraining
+
+>>>>>>> pred-num-circles
 
 """
 Not all friends have to be in a circle.
@@ -321,6 +348,7 @@ if __name__ == '__main__':
     FEATURE_LIST_FILE = 'features/featureList.txt'
     FEATURE_WEIGHT_FILE = "feature_weights.txt"
 
+    print 'Loading input data.'
     data = Data()
 
     # Load friend map.
@@ -339,16 +367,40 @@ if __name__ == '__main__':
     if not sanityChecks(data):
         print 'Data was not imported in the correct format.'
         exit()
-    
-    # Calculate general stats from data.
-    if args.s and args.trim:
-        statify(data, True)
-    elif args.s:
-        statify(data)
 
     trainingPeople = []
     for key in data.trainingMap:
         trainingPeople.append(key)
+
+    # Calculate general stats from data.
+    if args.s:
+        stat_attributes, stat_values = statify(data, args.trim, args.show)
+
+        stat_indices = range(len(stat_attributes))
+        train_indices, test_indices = splitIntoTrainingAndTestSets(stat_indices, 0.8)
+
+        stat_training_attrs = [stat_attributes[i] for i in train_indices]
+        stat_testing_attrs = [stat_attributes[i] for i in test_indices]
+
+        models = [svm.SVC(), RandomForestClassifier(), LinearRegression(),
+                Ridge(), BayesianRidge(), LogisticRegression()]
+        model_names = ['SVM', 'Random Forest', 'OLS', 'BayesianRidge',
+                'LogisticRegression']
+        for value_set in range(len(stat_values)):
+            stat_training_values = [stat_values[value_set][i] for i in train_indices]
+            stat_testing_values = [stat_values[value_set][i] for i in test_indices]
+            print stat_testing_values, '='
+
+            for model, name in zip(models, model_names):
+
+                clf = model
+                clf.fit(stat_training_attrs, stat_training_values)
+                stat_pred = clf.predict(stat_training_attrs)
+                print stat_pred
+                diff =[]
+                for trueValue, predValue in zip(stat_testing_values, stat_pred):
+                    diff.append(abs(trueValue - predValue))
+                print 'Errors for model', name, ':', sum(diff), 'on value set', value_set
 
     # Visualize data
     if args.v:
@@ -425,8 +477,8 @@ if __name__ == '__main__':
                     actualTotalPeople += len(circle)
 
                 mclCirclMap[currentPerson] = mclCircles
-                #print 'Num MCL circles:', len(mclCircles), 'Actual:', len(trainingMap[currentPerson])
-                #print 'MCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
+                print 'Num MCL circles:', len(mclCircles), 'Actual:', len(data.trainingMap[currentPerson])
+                print '\tMCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
 
             mcl_training = 'mcl_training.csv'
             real_training = 'real_training_data.csv'
@@ -462,14 +514,7 @@ if __name__ == '__main__':
         # SVM w/ Markov Cluster
         svmMclCircleMap = {}
 
-        # Shuffle training people and use half for test, half for training.
-        print 'Shuffling original training people.'
-        random.shuffle(trainingPeople)
-        trainingEnd = int(len(trainingPeople) * 0.5)
-        print 'Using', trainingEnd, 'people for training.'
-        print 'Using', len(trainingPeople) - trainingEnd, 'people for testing.'
-        trainFromTraining = trainingPeople[0:trainingEnd]
-        testFromTraining = trainingPeople[trainingEnd:]
+        trainFromTraining, testFromTraining = splitIntoTrainingAndTestSets(trainingPeople)
 
         # Attempt to train SVM to detect if two people are in same circle.
         SVMTrainAttrs = []
