@@ -230,10 +230,13 @@ def writeSubmission(filename, circleMap, test=False):
         line = person + ','
 
         if not test:
-            for circle in circles:
-                for friend in circle:
-                    line += friend + ' '
-                line += ';'
+            for i in range(len(circles)):#circle in circles:
+                for j in range(len(circles[i])):#friend in circles[i]:
+                    line += circles[i][j]
+                    if j != len(circles[i]) - 1:
+                        line += ' '
+                if i != len(circles) - 1:
+                    line += ';'
         else:
             for friend in circles:
                 line += friend + ' '
