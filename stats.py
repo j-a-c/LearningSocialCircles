@@ -17,6 +17,12 @@ def _reportHistData(title, data):
     print '\t75%:', numpy.percentile(data, 75)
     print '\tMax:', max(data)
 
+def _reportXYPlotData(x, y, title):
+    pylab.plot(x, y, 'ro')
+    pylab.title(title)
+    pylab.show()
+
+
 """
 Entry point for calculating statistics.
 
@@ -48,17 +54,21 @@ def statify(data, trim=False):
 
 
     # Calculate useful data
+    numFriendsAll = []
     circleSizes = []
     circleSizesNorm = []
     circleDiameters = []
     circleDiametersNorm = []
     numClusterNormalizeds = []
     avgClusterNormalizeds = []
+    numClustersNotNormalized = []
+    numTrianglesAll = []
 
     for userid in trainingMap:
         numClusterNormalized = 0.0
         avgClusterNormalized = 0.0
         numFriends = len(friendMap[userid])
+        numFriendsAll.append(numFriends)
         for circle in trainingMap[userid]:
             # Size of circle
             circleSizes.append(len(circle))
@@ -67,12 +77,22 @@ def statify(data, trim=False):
             diameter = _diameterOf(circle, friendMap)
             circleDiameters.append(diameter)
             circleDiametersNorm.append(float(diameter) / numFriends)
-            #
+            # Update the number of clusters in the graph.
             numClusterNormalized += 1
-            #
+            # Update the stat for the size of cluster in the graph.
             avgClusterNormalized += len(circle)
+        # Count the number of triangles in the graph.
+        numTriangles = 0
+        for person1 in data.friendMap[userid]:
+            for person2 in data.friendMap[userid]:
+                for friend in data.friendMap[person1]:
+                    if friend in data.friendMap[person2]:
+                        numTriangles += 1
+        # We counted each triangle three times.
+        numTriangles /= 3
+        numTrianglesAll.append(numTriangles)
 
-
+        numClustersNotNormalized.append(numClusterNormalized)
         numClusterNormalized /= numFriends
         avgClusterNormalized /= numFriends
         numClusterNormalizeds.append(numClusterNormalized)
@@ -80,6 +100,9 @@ def statify(data, trim=False):
 
 
     # Report data
+    _reportXYPlotData(numFriendsAll, numClustersNotNormalized, 'Friends vs Clusters')
+    _reportXYPlotData(numTrianglesAll, numClustersNotNormalized, 'Triangles vs Clusters')
+    _reportXYPlotData(numTrianglesAll, numFriendsAll, 'Triangles vs Friends')
     _reportHistData('Normalized Number of clusters:', numClusterNormalizeds)
     _reportHistData('Normalized average cluster size:', avgClusterNormalizeds)
     _reportHistData('Normalized circle sizes:', circleSizesNorm)

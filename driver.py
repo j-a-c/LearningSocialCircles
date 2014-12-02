@@ -413,8 +413,8 @@ if __name__ == '__main__':
                     actualTotalPeople += len(circle)
 
                 mclCirclMap[currentPerson] = mclCircles
-                #print 'Num MCL circles:', len(mclCircles), 'Actual:', len(trainingMap[currentPerson])
-                #print 'MCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
+                print 'Num MCL circles:', len(mclCircles), 'Actual:', len(data.trainingMap[currentPerson])
+                print '\tMCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
 
             mcl_training = 'mcl_training.csv'
             real_training = 'real_training_data.csv'
