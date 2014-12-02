@@ -1,5 +1,6 @@
 from collections import defaultdict
 import random
+import sys
 
 class KMeans(object):
     def __init__(self, persons=None, similarity_calculator=None):
@@ -74,10 +75,35 @@ class KMeans(object):
             
         return centroids
                 
+    def _trim_clusters(self, clusters, similarity_diff_threshold):
+        for centroid in clusters:
+            #compute maximum and minimum similarity from centroid for each circle/cluster
+            minimum_similarity = sys.maxint
+            maximum_similarity = -1
+            for friend in clusters[centroid]:
+                similarity = self._computeSimilarity(centroid, friend)
+                if similarity < minimum_similarity:
+                    minimum_similarity = similarity
+                if similarity > maximum_similarity:
+                    maximum_similarity = similarity
+            print('max sim: ' + str(maximum_similarity) + ' min sim: ' + str(minimum_similarity))
+                    
+            #if similarity difference is more than a threshold, drop friends with 
+            #small similarity from circle/cluster
+            similarity_difference_in_cluster = maximum_similarity - minimum_similarity
+            if similarity_difference_in_cluster > similarity_diff_threshold:
+                friends_to_remove = []
+                for friend in clusters[centroid]:
+                    if self._computeSimilarity(centroid, friend) < maximum_similarity - similarity_diff_threshold:
+                        friends_to_remove.append(friend)
+                for friend_to_remove in friends_to_remove:
+                    clusters[centroid].remove(friend_to_remove)
+        return clusters
+    
     def setSimilarityCalculator(self, similarity_calculator):
         self._similarity_calculator = similarity_calculator
         
-    def computeClusters(self, data_points, k, max_iterations=10):
+    def computeClusters(self, data_points, k, similarity_diff_threshold, max_iterations=20):
         data_points_list = list(data_points)
         centroids = self._computeInitialCentriods(data_points_list, k)
         prev_clusters = defaultdict(list)
@@ -90,5 +116,7 @@ class KMeans(object):
             prev_clusters = clusters
             centroids = self._recomputeCentroids(clusters)
         
-        return clusters
+        return self._trim_clusters(clusters, similarity_diff_threshold)
+        
+    
     

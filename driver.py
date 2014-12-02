@@ -146,11 +146,16 @@ feature per line.
 
 Ouput is a list containing all the features.
 """
-def loadFeatureList(filename):
+def loadFeatureList(filename, featureweight_filename):
     featureList = []
+    feature_Wlist = {}
     for line in open(filename):
         featureList.append(line.strip())
-    return featureList
+    for line in open(featureweight_filename):
+        line = line.strip()
+        weight = line.split("--")
+        feature_Wlist[weight[0]] = float(weight[1])
+    return featureList, feature_Wlist
 
 
 """
@@ -240,27 +245,33 @@ def printMetricCommand(realOutput, testOutput):
     print '\nEvaluate using:'
     print 'python socialCircles_metric.py', realOutput, testOutput
 
-def k_means_clustering(data, show=False):
-    attribute_clusters = {}
-    attribute_and_friendship_clusters = {}
-    k_means = KMeans(data.persons, similarityCalculator.simiarity_according_to_attributes)
-
+def _compute_k_means_clusters(data, similarity_calculator, similarity_diff_threshold):
+    computed_clusters = {}
+    k_means = KMeans(data.persons, similarity_calculator)
     for personID in data.originalPeople:
-        clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
-        attribute_clusters[personID] = clusters
+        friends_of_person = data.persons.getPerson(personID).getFriends()
+        if len(friends_of_person) > 250:
+            k = 12
+        else:
+            k = 6
+        clusters = k_means.computeClusters(friends_of_person, k, similarity_diff_threshold)
+        computed_clusters[personID] = clusters
+    return computed_clusters
 
-    k_means.setSimilarityCalculator(similarityCalculator.simiarity_according_to_attributes_and_friendship)
-    for personID in data.originalPeople:
-        clusters = k_means.computeClusters(data.persons.getPerson(personID).getFriends(), 5)
-        attribute_and_friendship_clusters[personID] = clusters
-
+def k_means_clustering(data, featureWeightMap, show=False):
+    SimilarityCalc = similarityCalculator.SimilarityCalculator(featureWeightMap)
+    attribute_clusters = _compute_k_means_clusters(data, SimilarityCalc.simiarity_according_to_attributes, 5)
+    attribute_and_friendship_clusters = _compute_k_means_clusters(data, SimilarityCalc.simiarity_according_to_attributes_and_friendship, 10)
+    weighted_attribute_and_friendship_clusters = _compute_k_means_clusters(data, SimilarityCalc.similarity_weighted_attributes_friendship, 3.5)
+    
     if show:
         visualizer = Visualizer()
         for personID in data.persons.getOriginalPersons():
             visualizer.visualizeClusters( attribute_clusters[personID] )
             visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
 
-    return attribute_clusters, attribute_and_friendship_clusters
+    return attribute_clusters, attribute_and_friendship_clusters, weighted_attribute_and_friendship_clusters
+
 """
 Not all friends have to be in a circle.
 Circles may be disjoint, overlap, or hierarchically nested.
@@ -308,6 +319,7 @@ if __name__ == '__main__':
     TRAINING_DIR = 'training'
     FEATURE_FILE = 'features/features.txt'
     FEATURE_LIST_FILE = 'features/featureList.txt'
+    FEATURE_WEIGHT_FILE = "feature_weights.txt"
 
     data = Data()
 
@@ -317,9 +329,9 @@ if __name__ == '__main__':
     # Load features.
     data.featureMap = loadFeatures(FEATURE_FILE, data.persons)
 
-    # Load feature list.
-    data.featureList = loadFeatureList(FEATURE_LIST_FILE)
-
+    # Load feature list
+    data.featureList, featureWeightMap = loadFeatureList(FEATURE_LIST_FILE,FEATURE_WEIGHT_FILE)
+    
     # Load training data.
     data.trainingMap = loadTrainingData(TRAINING_DIR)
 
@@ -327,7 +339,7 @@ if __name__ == '__main__':
     if not sanityChecks(data):
         print 'Data was not imported in the correct format.'
         exit()
-
+    
     # Calculate general stats from data.
     if args.s and args.trim:
         statify(data, True)
@@ -348,7 +360,7 @@ if __name__ == '__main__':
         # Select prediction method
         if args.p == 'kmeans':
             print 'Using k-means clustering metric.'
-            attribute_clusters, attribute_and_friendship_clusters = k_means_clustering(data, args.show)
+            attribute_clusters, attribute_and_friendship_clusters, weighted_attribute_and_friendship_clusters = k_means_clustering(data, featureWeightMap, args.show)
 
             real_training_data = 'real_training_data.csv'
             kmeans_attrs = 'kmeans_attrs.csv'
