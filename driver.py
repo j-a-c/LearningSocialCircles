@@ -328,13 +328,13 @@ if __name__ == '__main__':
         print 'Data was not imported in the correct format.'
         exit()
 
-    # Calculate general stats from data.
-    if args.s:
-        stat_attributes, stat_values = statify(data, args.trim, args.show)
-
     trainingPeople = []
     for key in data.trainingMap:
         trainingPeople.append(key)
+
+    # Calculate general stats from data.
+    if args.s:
+        stat_attributes, stat_values = statify(data, args.trim, args.show)
 
     # Visualize data
     if args.v:
