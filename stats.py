@@ -87,10 +87,12 @@ def statify(data, trim=False, show=False):
             # Size of circle
             circleSizes.append(len(circle))
             circleSizesNorm.append(float(len(circle))/ numFriends)
-            # Diameter of the circle )
-            diameter = _diameterOf(circle, friendMap)
-            circleDiameters.append(diameter)
-            circleDiametersNorm.append(float(diameter) / numFriends)
+
+            # Diameter of the circle
+            #diameter = _diameterOf(circle, friendMap)
+            #circleDiameters.append(diameter)
+            #circleDiametersNorm.append(float(diameter) / numFriends)
+
             # Update the number of clusters in the graph.
             numClusterNormalized += 1
             # Update the stat for the size of cluster in the graph.
