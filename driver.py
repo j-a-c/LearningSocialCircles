@@ -274,10 +274,7 @@ def k_means_clustering(data, featureWeightMap, show=False):
             visualizer.visualizeClusters( attribute_clusters[personID] )
             visualizer.visualizeClusters( attribute_and_friendship_clusters[personID] )
 
-<<<<<<< HEAD
     return attribute_clusters, attribute_and_friendship_clusters, weighted_attribute_and_friendship_clusters
-=======
-    return attribute_clusters, attribute_and_friendship_clusters
 
 
 """
@@ -297,7 +294,6 @@ def splitIntoTrainingAndTestSets(trainingPeople, percent=0.5):
     testFromTraining = trainingPeople[trainingEnd:]
     return trainFromTraining, testFromTraining
 
->>>>>>> pred-num-circles
 
 """
 Not all friends have to be in a circle.
