@@ -1,3 +1,5 @@
+from sets import Set
+
 ###
 # Acceptable weight functions.
 # Must return a value that is logically true (number > 0) if an edge should
@@ -48,3 +50,30 @@ def topologyAndAttributes(data, person1, person2):
     else:
         return None
 
+def attributeIntersection(data, person1, person2):
+    profile_attrs1 = Set()
+    profile_attrs2 = Set()
+
+    for feature in data.featureMap[person1]:
+        profile_attrs1.add(data.featureMap[person1][feature])
+    for feature in data.featureMap[person2]:
+        profile_attrs2.add(data.featureMap[person2][feature])
+
+    intersection = len(profile_attrs1.intersection(profile_attrs2))
+    union = len(profile_attrs1.union(profile_attrs2))
+    if intersection == 0:
+        return None
+    else:
+        return (1.0 * intersection) / union
+
+
+def originalTopologyAndAttributeIntersection(data, person1, person2):
+    weight1 = originalTopology(data, person1, person2)
+    weight2 = attributeIntersection(data, person1, person2)
+
+    if weight1 == None:
+        return weight2
+    if weight2 == None:
+        return weight1
+
+    return weight1 + weight2

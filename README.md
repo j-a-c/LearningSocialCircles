@@ -27,6 +27,8 @@ Flags:
 - --edge Select the edge function to use when visualizing data. Supported
   options are: 
   * top: Uses the original graph topology.
+  * top-intersect: Uses original graph topology with a minor weight given to
+    attributes that are in common.
   * sim: Creates edges between similar users.
   * tri: Creates edges between users with friends in common.
   * combo: Uses both 'tri' and 'sim' to create edges.

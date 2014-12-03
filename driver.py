@@ -11,6 +11,7 @@ from stats import statify
 from visualize import Visualizer
 from weights import friendsInCommon
 from weights import originalTopology
+from weights import originalTopologyAndAttributeIntersection
 from weights import similarAttributes
 from weights import topologyAndAttributes
 from userData import Persons
@@ -342,11 +343,12 @@ if __name__ == '__main__':
             'sim': similarAttributes,
             'tri': friendsInCommon,
             'combo': topologyAndAttributes,
+            'top-intersect': originalTopologyAndAttributeIntersection,
             None: originalTopology
     }
     if args.edge not in EDGE_FUNCS:
         print 'Invalid edge function:', args.edge
-        print 'Allowable edge functions:', EDGE_FUNCS
+        print 'Allowable edge functions:', EDGE_FUNCS.keys()
         quit()
 
 

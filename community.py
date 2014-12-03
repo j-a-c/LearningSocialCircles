@@ -22,9 +22,6 @@ def community_using_igraph(data, origPerson, edgeFunc):
     # We will map ids to indices in the Graph.
     idMap = {}
     reverseIdMap = {}
-    # Weights for edges.
-    weights = []
-
 
     added_edges = Set()
 
@@ -39,6 +36,7 @@ def community_using_igraph(data, origPerson, edgeFunc):
         currentId += 1
 
     g = igraph.Graph()
+    g.es['weight'] = 1.0
 
     g.add_vertices(numFriends)
 
@@ -54,7 +52,7 @@ def community_using_igraph(data, origPerson, edgeFunc):
                 if not edgeName in added_edges and weight:
                     g.add_edge(sourceName, targetName)
                     added_edges.add(edgeName)
-                    weights.append(weight)
+                    g[sourceName, targetName] = weight
 
     clusters = []
 
@@ -67,34 +65,34 @@ def community_using_igraph(data, origPerson, edgeFunc):
 
     try:
         # edge_weights, vertex_weights
-        clusters = g.community_infomap()
+        clusters = g.community_infomap(edge_weights='weight')
     except:
         clusters = []
     infomap_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
         # weights
-        clusters = g.community_leading_eigenvector()
+        clusters = g.community_leading_eigenvector(weights='weight')
     except:
         clusters = []
     eigen_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
         # weights
-        clusters = g.community_label_propagation()
+        clusters = g.community_label_propagation(weights='weights')
     except:
         clusters = []
     label_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
         # weights
-        clusters = g.community_multilevel()
+        clusters = g.community_multilevel(weights='weight')
     except:
         clusters = []
     multi_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
-        clusters = g.community_spinglass()
+        clusters = g.community_spinglass(weights='weight')
     except:
         clusters = []
     spin_clusters = extract_clusters(clusters, reverseIdMap)
