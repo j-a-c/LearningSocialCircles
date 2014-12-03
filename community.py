@@ -16,7 +16,7 @@ def extract_clusters(clusters, reverseIdMap):
 
 
 
-def community_using_igraph(data, origPerson, edgeFunc):
+def community_using_igraph(data, origPerson, edgeFunc, pruneFunc):
     friendMap = data.friendMap
 
     # We will map ids to indices in the Graph.
@@ -69,6 +69,7 @@ def community_using_igraph(data, origPerson, edgeFunc):
     except:
         clusters = []
     infomap_clusters = extract_clusters(clusters, reverseIdMap)
+    infomap_clusters = pruneFunc(data, origPerson, infomap_clusters)
 
     try:
         # weights

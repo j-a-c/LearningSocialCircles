@@ -485,7 +485,7 @@ if __name__ == '__main__':
             for origPersonIndex in range(len(trainingPeople)):
                 print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
                 origPerson = trainingPeople[origPersonIndex]
-                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
+                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge], PRUNE_FUNCS[args.prune])
 
                 info_clusters_dict[origPerson] = info_clusters
                 eigen_clusters_dict[origPerson] = eigen_clusters
@@ -524,7 +524,7 @@ if __name__ == '__main__':
             for origPersonIndex in range(len(kagglePeople)):
                 print '\t' + str(1 + origPersonIndex) + '/' + str(len(kagglePeople))
                 origPerson = kagglePeople[origPersonIndex]
-                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
+                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge], PRUNE_FUNCS[args.prune])
 
                 info_clusters_dict[origPerson] = info_clusters
                 eigen_clusters_dict[origPerson] = eigen_clusters
