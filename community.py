@@ -19,9 +19,11 @@ def extract_clusters(clusters, reverseIdMap):
 def community_using_igraph(data, origPerson, edgeFunc):
     friendMap = data.friendMap
 
-    # Create adjacency matrix. We will map ids to indices in the matrix.
+    # We will map ids to indices in the Graph.
     idMap = {}
     reverseIdMap = {}
+    # Weights for edges.
+    weights = []
 
 
     added_edges = Set()
@@ -39,6 +41,7 @@ def community_using_igraph(data, origPerson, edgeFunc):
     g = igraph.Graph()
 
     g.add_vertices(numFriends)
+
     for source in idMap:
         for target in idMap:
             # Do not add self edges
@@ -47,9 +50,11 @@ def community_using_igraph(data, origPerson, edgeFunc):
                 targetName = idMap[target]
                 edgeName = name(sourceName, targetName)
                 # Do not add the same edge twice
-                if not edgeName in added_edges and edgeFunc(data, source, target):
+                weight = edgeFunc(data, source, target)
+                if not edgeName in added_edges and weight:
                     g.add_edge(sourceName, targetName)
                     added_edges.add(edgeName)
+                    weights.append(weight)
 
     clusters = []
 
