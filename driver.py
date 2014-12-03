@@ -503,6 +503,7 @@ if __name__ == '__main__':
             printMetricCommand(real_training_data, spin_clusters_data)
 
             print 'Calculating Kaggle submission data.'
+            # Reset dictionaries.
             info_clusters_dict = {}
             eigen_clusters_dict = {}
             label_clusters_dict = {}
