@@ -15,6 +15,8 @@ Flags:
   displaying intersection attributes.
 - -p Predict social circles using the specified predictor. Supported
   predictors:
+  * igraph - Use various community detection algorithms from the igraph
+    package.
   * kmeans - K-means clustering
   * mcl - Markvoc clustering algorithm. Can be combined with --edge parameter.
 - -v Visualize data. By default uses original topology to construct graphs.

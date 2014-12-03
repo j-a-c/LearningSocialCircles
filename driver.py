@@ -1,3 +1,4 @@
+from community import community_using_igraph
 from mcl import mcl
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
@@ -321,8 +322,8 @@ if __name__ == '__main__':
     parser.add_argument('-s', action='store_true', help='Compute statistics.')
     parser.add_argument('--trim', action='store_true', help='Trim common data.')
     parser.add_argument('-p', action='store', help='Predict social circles \
-            using the given predictor. Supported predictors are \'kmeans\' and \
-            \'mcl\'.')
+            using the given predictor. Supported predictors are \'kmeans\', \
+            \'mcl\', and \'igraph\'.')
     parser.add_argument('-v', action='store_true', help='Visualize data. By \
             default uses original topology to construct graphs.')
     parser.add_argument('--edge', action='store', help='Select edge function')
@@ -455,6 +456,11 @@ if __name__ == '__main__':
             printMetricCommand(real_training_data, kmeans_attrs_friends)
             printMetricCommand(real_training_data, kmeans_weighted_attrs_friends)
             print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends, kmeans_kaggle_weighted_attrs_friends
+
+        if args.p == 'igraph':
+            print 'Using igraph community detection algorithms.'
+            origPerson = '239'
+            ret = community_using_igraph(data, origPerson)
 
         if args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
