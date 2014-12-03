@@ -368,7 +368,7 @@ if __name__ == '__main__':
 
     # Load feature list
     data.featureList, featureWeightMap = loadFeatureList(FEATURE_LIST_FILE,FEATURE_WEIGHT_FILE)
-    
+
     # Load training data.
     data.trainingMap = loadTrainingData(TRAINING_DIR)
 
@@ -377,9 +377,14 @@ if __name__ == '__main__':
         print 'Data was not imported in the correct format.'
         exit()
 
+    # List of people to calculate training data for.
     trainingPeople = []
     for key in data.trainingMap:
         trainingPeople.append(key)
+
+    # List of the Kaggle submission people.
+    kagglePeople = [origPerson for origPerson in data.originalPeople if origPerson
+            not in trainingPeople]
 
     # Calculate general stats from data.
     if args.s:
@@ -458,17 +463,57 @@ if __name__ == '__main__':
             print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends, kmeans_kaggle_weighted_attrs_friends
 
         elif args.p == 'igraph':
-            print 'Using igraph community detection algorithms.'
+            if False:
+                print 'Using igraph community detection algorithms.'
+                info_clusters_dict = {}
+                eigen_clusters_dict = {}
+                label_clusters_dict = {}
+                multi_clusters_dict = {}
+                spin_clusters_dict = {}
+
+                print 'Calculating training data.'
+                for origPersonIndex in range(len(trainingPeople)):
+                    print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
+                    origPerson = trainingPeople[origPersonIndex]
+                    info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
+
+                    info_clusters_dict[origPerson] = info_clusters
+                    eigen_clusters_dict[origPerson] = eigen_clusters
+                    label_clusters_dict[origPerson] = label_clusters
+                    multi_clusters_dict[origPerson] = multi_clusters
+                    spin_clusters_dict[origPerson] = spin_clusters
+
+                real_training_data = 'real_training_data.csv'
+                info_clusters_data = 'infomap_clusters_data.csv'
+                eigen_clusters_data = 'eigen_clusters_data.csv'
+                label_clusters_data = 'label_clusters_data.csv'
+                multi_clusters_data = 'multi_clusters_data.csv'
+                spin_clusters_data = 'spin_clusters_data.csv'
+
+                writeSubmission(real_training_data, data.trainingMap)
+                writeSubmission(info_clusters_data, info_clusters_dict)
+                writeSubmission(eigen_clusters_data, eigen_clusters_dict)
+                writeSubmission(label_clusters_data, label_clusters_dict)
+                writeSubmission(multi_clusters_data, multi_clusters_dict)
+                writeSubmission(spin_clusters_data, spin_clusters_dict)
+
+                printMetricCommand(real_training_data, info_clusters_data)
+                printMetricCommand(real_training_data, eigen_clusters_data)
+                printMetricCommand(real_training_data, label_clusters_data)
+                printMetricCommand(real_training_data, multi_clusters_data)
+                printMetricCommand(real_training_data, spin_clusters_data)
+
+
+            print 'Calculating Kaggle submission data.'
             info_clusters_dict = {}
             eigen_clusters_dict = {}
             label_clusters_dict = {}
             multi_clusters_dict = {}
             spin_clusters_dict = {}
 
-            trainingPeople
-            for origPersonIndex in range(len(trainingPeople)):
-                print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
-                origPerson = trainingPeople[origPersonIndex]
+            for origPersonIndex in range(len(kagglePeople)):
+                print '\t' + str(1 + origPersonIndex) + '/' + str(len(kagglePeople))
+                origPerson = kagglePeople[origPersonIndex]
                 info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
 
                 info_clusters_dict[origPerson] = info_clusters
@@ -477,26 +522,24 @@ if __name__ == '__main__':
                 multi_clusters_dict[origPerson] = multi_clusters
                 spin_clusters_dict[origPerson] = spin_clusters
 
-            real_training_data = 'real_training_data.csv'
-            info_clusters_data = 'infomap_clusters_data.csv'
-            eigen_clusters_data = 'eigen_clusters_data.csv'
-            label_clusters_data = 'label_clusters_data.csv'
-            multi_clusters_data = 'multi_clusters_data.csv'
-            spin_clusters_data = 'spin_clusters_data.csv'
+            info_clusters_data = 'kaggle_infomap_clusters_data.csv'
+            eigen_clusters_data = 'kaggle_eigen_clusters_data.csv'
+            label_clusters_data = 'kaggle_label_clusters_data.csv'
+            multi_clusters_data = 'kaggle_multi_clusters_data.csv'
+            spin_clusters_data = 'kaggle_spin_clusters_data.csv'
 
-            writeSubmission(real_training_data, data.trainingMap)
             writeSubmission(info_clusters_data, info_clusters_dict)
             writeSubmission(eigen_clusters_data, eigen_clusters_dict)
             writeSubmission(label_clusters_data, label_clusters_dict)
             writeSubmission(multi_clusters_data, multi_clusters_dict)
             writeSubmission(spin_clusters_data, spin_clusters_dict)
 
-            printMetricCommand(real_training_data, info_clusters_data)
-            printMetricCommand(real_training_data, eigen_clusters_data)
-            printMetricCommand(real_training_data, label_clusters_data)
-            printMetricCommand(real_training_data, multi_clusters_data)
-            printMetricCommand(real_training_data, spin_clusters_data)
-
+            print 'Kaggle submission data:'
+            print '\t', info_clusters_data
+            print '\t', eigen_clusters_data
+            print '\t', label_clusters_data
+            print '\t', multi_clusters_data
+            print '\t', spin_clusters_data
 
         elif args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
