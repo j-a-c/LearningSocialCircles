@@ -4,10 +4,17 @@
 # type is a list of clusters returning to the person.
 ###
 
+def _removeOriginalPersonFromClusters(original, clusters):
+    new_clusters = []
+    for cluster in clusters:
+        clusters.append([i for i in cluster if i != original])
+    return new_clusters
+
 """
 Returns the original clusters. Does not make any changes.
 """
 def noPrune(data, person, clusters):
+    clusters = _removeOriginalPersonFromClusters(person, clusters)
     return clusters
 
 
@@ -19,6 +26,6 @@ def copyBiggest(data, person, clusters):
 
     for cluster in clusters:
         if len(cluster) == max_length:
-            new_clusters.append(clusters)
+            new_clusters.append(cluster)
 
     return new_clusters

@@ -6,6 +6,7 @@ from sklearn.linear_model import BayesianRidge
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Ridge
+from prune import copyBiggest
 from prune import noPrune
 from stats import statify
 from visualize import Visualizer
@@ -353,7 +354,8 @@ if __name__ == '__main__':
         quit()
 
     PRUNE_FUNCS = {
-        None: noPrune
+            'copyBiggest': copyBiggest,
+            None: noPrune
     }
     if args.prune not in PRUNE_FUNCS:
         print 'Invalid prune function:', args.prune
