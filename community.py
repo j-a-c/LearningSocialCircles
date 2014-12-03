@@ -72,27 +72,31 @@ def community_using_igraph(data, origPerson, edgeFunc):
 
     try:
         # weights
-        clusters = g.community_leading_eigenvector(weights='weight')
+        #clusters = g.community_leading_eigenvector(weights='weight')
+        None
     except:
         clusters = []
     eigen_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
         # weights
-        clusters = g.community_label_propagation(weights='weights')
+        #clusters = g.community_label_propagation(weights='weights')
+        None
     except:
         clusters = []
     label_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
         # weights
-        clusters = g.community_multilevel(weights='weight')
+        #clusters = g.community_multilevel(weights='weight')
+        None
     except:
         clusters = []
     multi_clusters = extract_clusters(clusters, reverseIdMap)
 
     try:
-        clusters = g.community_spinglass(weights='weight')
+        None
+        #clusters = g.community_spinglass(weights='weight')
     except:
         clusters = []
     spin_clusters = extract_clusters(clusters, reverseIdMap)
