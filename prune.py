@@ -7,7 +7,7 @@
 def _removeOriginalPersonFromClusters(original, clusters):
     new_clusters = []
     for cluster in clusters:
-        clusters.append([i for i in cluster if i != original])
+        new_clusters.append([i for i in cluster if i != original])
     return new_clusters
 
 """
@@ -17,6 +17,12 @@ def noPrune(data, person, clusters):
     clusters = _removeOriginalPersonFromClusters(person, clusters)
     return clusters
 
+def removeClustersWithNotManyPeople(data, person, clusters):
+    new_clusters = []
+    for cluster in clusters:
+        if len(clusters) > 3:
+            new_clusters.append(cluster)
+    return new_clusters
 
 def copyBiggest(data, person, clusters):
     lengths = [len(cluster) for cluster in clusters]

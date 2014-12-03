@@ -477,6 +477,7 @@ if __name__ == '__main__':
 
         elif args.p == 'igraph':
             print 'Using igraph community detection algorithms.'
+            """
             info_clusters_dict = {}
             eigen_clusters_dict = {}
             label_clusters_dict = {}
@@ -514,6 +515,7 @@ if __name__ == '__main__':
             printMetricCommand(real_training_data, label_clusters_data)
             printMetricCommand(real_training_data, multi_clusters_data)
             printMetricCommand(real_training_data, spin_clusters_data)
+            """
 
             print 'Calculating Kaggle submission data.'
             # Reset dictionaries.
@@ -559,7 +561,8 @@ if __name__ == '__main__':
             # Markov Cluster Algorithm
             mclCirclMap = {}
             counter = 1
-            for currentPerson in trainingPeople:
+            #for currentPerson in trainingPeople:
+            for currentPerson in kagglePeople:
                 # Report progress
                 print counter, '/', len(trainingPeople)
                 counter += 1
