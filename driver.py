@@ -6,7 +6,7 @@ from sklearn.linear_model import BayesianRidge
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Ridge
-from clfHelper import attributeAndValue
+from prune import noPrune
 from stats import statify
 from visualize import Visualizer
 from weights import friendsInCommon
@@ -353,7 +353,7 @@ if __name__ == '__main__':
         quit()
 
     PRUNE_FUNCS = {
-        None: None
+        None: noPrune
     }
     if args.prune not in PRUNE_FUNCS:
         print 'Invalid prune function:', args.prune
@@ -613,153 +613,3 @@ if __name__ == '__main__':
             writeSubmission('one_circle.csv', oneCircleMap, True)
             printMetricCommand('sample_submission.csv', 'one_circle.csv')
 
-
-
-        """
-        TODO Clean up lines below here...
-        """
-
-        quit()
-
-
-
-
-        # SVM w/ Markov Cluster
-        svmMclCircleMap = {}
-
-        trainFromTraining, testFromTraining = splitIntoTrainingAndTestSets(trainingPeople)
-
-        # Attempt to train SVM to detect if two people are in same circle.
-        SVMTrainAttrs = []
-        SVMTrainValues = []
-        # Create training data for SVM.
-        print 'Creating training data for SVM.'
-        for currentPerson in trainFromTraining:
-
-            # We want to include each pair of friends only once.
-            friendList = []
-            for friend in data.friendMap[currentPerson]:
-                # Safety check to avoid self loops
-                if friend != currentPerson:
-                    friendList.append(friend)
-
-            for firstIndex in range(len(friendList)):
-                for secondIndex in range(firstIndex+1, len(friendList)):
-                    person1 = friendList[firstIndex]
-                    person2 = friendList[secondIndex]
-
-                    nextAttr, nextValue = attributeAndValue(currentPerson, person1, person2, data)
-
-                    SVMTrainAttrs.append(nextAttr)
-                    SVMTrainValues.append(nextValue)
-        # Train SVM
-        print 'Total training values:', len(SVMTrainValues)
-        #clf = svm.SVC()
-        clf = RandomForestClassifier()
-
-        """
-        # Use this code if it is too slow to train model with lot of examples.
-        # Keep a subset of training data
-        NUM_TRAIN = 500
-        print 'Selecting', NUM_TRAIN, 'values for training.'
-        selected = [random.randint(0, len(SVMTrainAttrs)) for i in range(NUM_TRAIN)]
-        SVMTrainAttrs = [SVMTrainAttrs[i] for i in selected]
-        SVMTrainValues = [SVMTrainValues[i] for i in selected]
-        """
-        #
-        print 'Training SVM.'
-        clf.fit(SVMTrainAttrs, SVMTrainValues)
-
-        # Test SVM.
-        print 'Testing SVM.'
-        testSVMAttrs = []
-        testSVMTrueValues = []
-        friendPairs = []
-        weights = collections.defaultdict(dict)
-        for currentPerson in testFromTraining:
-
-            # We want to include each pair of friends only once.
-            friendList = []
-            for friend in data.friendMap[currentPerson]:
-                # Safety check to avoid self loops
-                if friend != currentPerson:
-                    friendList.append(friend)
-
-            for firstIndex in range(len(friendList)):
-                for secondIndex in range(firstIndex+1, len(friendList)):
-                    person1 = friendList[firstIndex]
-                    person2 = friendList[secondIndex]
-
-                    friendPairs.append((person1, person2))
-                    nextAttr, nextValue = attributeAndValue(currentPerson, person1, person2, data)
-                    testSVMAttrs.append(nextAttr)
-                    testSVMTrueValues.append(nextValue)
-
-        testSVMPredValues = clf.predict(testSVMAttrs)
-        numTestsInInCorrect = 0
-        numTestsInWrong = 0
-        numTestsInInTotal = 0
-        numTestOutWrong = 0
-        numTestOutTotal = 0
-        numTestOutCorrect = 0
-        for trueValue, predValue, pair in zip(testSVMTrueValues, testSVMPredValues, friendPairs):
-            weights[pair[0]][pair[1]] = predValue
-            weights[pair[1]][pair[0]] = predValue
-            if trueValue == predValue:
-                if trueValue == 1:
-                    numTestsInInCorrect += 1
-                else:
-                    numTestOutCorrect += 1
-            # trueValue != predValue
-            else:
-                if trueValue == 0:
-                    numTestOutWrong += 1
-                else:
-                    numTestsInWrong += 1
-
-
-            if trueValue == 1:
-                numTestsInInTotal += 1
-            else:
-                numTestOutTotal += 1
-
-        totalCorrect =  + numTestsInInCorrect + numTestOutCorrect
-        print 'Total Correct:', totalCorrect, '/', len(testSVMPredValues)
-        print '\t%:', (1.0 * totalCorrect) / len(testSVMPredValues)
-        print 'True In Circle:', numTestsInInCorrect, '/', numTestsInInTotal, 'Want this to be high!)'
-        print '\t%:', (1.0 * numTestsInInCorrect) / numTestsInInTotal
-        print 'False In Circle:', numTestOutWrong, '/', numTestOutTotal, '(Want this to be low!)'
-        print '\t%:', (1.0 * numTestOutWrong) / numTestOutTotal
-        #print 'True Out Circle:', numTestOutCorrect, '/', numTestOutTotal
-        #print '\t%:', (1.0 * numTestOutCorrect) / numTestOutTotal
-        #print 'False Out Circle:', numTestsInWrong, '/', numTestsInInTotal
-        #print '\t%:', (1.0 * numTestsInWrong) / numTestsInInTotal
-
-
-        # Use SVM to construct SVM matrix
-        print 'Predicting circles.'
-        testFromTrainingMap = {}
-        counter = 1
-        for currentPerson in testFromTraining:
-            # Report progress
-            print counter, '/', len(testFromTraining)
-            counter += 1
-
-            # Perform actual MCL calculation
-            mclCircles = mcl(currentPerson, data, weights)
-            mclTotalPeople = 0
-            actualTotalPeople = 0
-            for circle in mclCircles:
-                mclTotalPeople += len(circle)
-            for circle in data.trainingMap[currentPerson]:
-                actualTotalPeople += len(circle)
-
-            svmMclCircleMap[currentPerson] = mclCircles
-            testFromTrainingMap[currentPerson] = data.trainingMap[currentPerson]
-            print 'Num MCL circles:', len(mclCircles), 'Actual:', len(data.trainingMap[currentPerson])
-            print 'MCL in:', mclTotalPeople, 'Actual in:', actualTotalPeople
-        TEST_OUTPUT = 'svm_mcl_circle.csv'
-        REAL_OUTPUT = 'real_circle.csv'
-        writeSubmission(TEST_OUTPUT, svmMclCircleMap)
-        writeSubmission(REAL_OUTPUT, testFromTrainingMap)
-        printMetricCommand(REAL_OUTPUT, TEST_OUTPUT)
