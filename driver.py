@@ -8,11 +8,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Ridge
 from clfHelper import attributeAndValue
 from stats import statify
-from visualize import friendsInCommon
-from visualize import originalTopology
-from visualize import similarAttributes
-from visualize import topologyAndAttributes
 from visualize import Visualizer
+from weights import friendsInCommon
+from weights import originalTopology
+from weights import similarAttributes
+from weights import topologyAndAttributes
 from userData import Persons
 from kmeans import KMeans
 
