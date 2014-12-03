@@ -457,12 +457,12 @@ if __name__ == '__main__':
             printMetricCommand(real_training_data, kmeans_weighted_attrs_friends)
             print '\nKaggle submission files:', kmeans_kaggle_attrs, kmeans_kaggle_attrs_friends, kmeans_kaggle_weighted_attrs_friends
 
-        if args.p == 'igraph':
+        elif args.p == 'igraph':
             print 'Using igraph community detection algorithms.'
             origPerson = '239'
             ret = community_using_igraph(data, origPerson)
 
-        if args.p == 'mcl':
+        elif args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
             print 'Using edge function:', args.edge
             # Markov Cluster Algorithm
