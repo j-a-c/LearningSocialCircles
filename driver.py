@@ -461,27 +461,41 @@ if __name__ == '__main__':
             print 'Using igraph community detection algorithms.'
             info_clusters_dict = {}
             eigen_clusters_dict = {}
+            label_clusters_dict = {}
+            multi_clusters_dict = {}
+            spin_clusters_dict = {}
 
             trainingPeople
             for origPersonIndex in range(len(trainingPeople)):
                 print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
                 origPerson = trainingPeople[origPersonIndex]
-                info_clusters, eigen_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
+                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
 
                 info_clusters_dict[origPerson] = info_clusters
                 eigen_clusters_dict[origPerson] = eigen_clusters
+                label_clusters_dict[origPerson] = label_clusters
+                multi_clusters_dict[origPerson] = multi_clusters
+                spin_clusters_dict[origPerson] = spin_clusters
 
             real_training_data = 'real_training_data.csv'
             info_clusters_data = 'infomap_clusters_data.csv'
             eigen_clusters_data = 'eigen_clusters_data.csv'
+            label_clusters_data = 'label_clusters_data.csv'
+            multi_clusters_data = 'multi_clusters_data.csv'
+            spin_clusters_data = 'spin_clusters_data.csv'
 
             writeSubmission(real_training_data, data.trainingMap)
             writeSubmission(info_clusters_data, info_clusters_dict)
             writeSubmission(eigen_clusters_data, eigen_clusters_dict)
+            writeSubmission(label_clusters_data, label_clusters_dict)
+            writeSubmission(multi_clusters_data, multi_clusters_dict)
+            writeSubmission(spin_clusters_data, spin_clusters_dict)
 
             printMetricCommand(real_training_data, info_clusters_data)
             printMetricCommand(real_training_data, eigen_clusters_data)
-
+            printMetricCommand(real_training_data, label_clusters_data)
+            printMetricCommand(real_training_data, multi_clusters_data)
+            printMetricCommand(real_training_data, spin_clusters_data)
 
 
         elif args.p == 'mcl':

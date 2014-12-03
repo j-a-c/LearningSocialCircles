@@ -51,8 +51,7 @@ def community_using_igraph(data, origPerson, edgeFunc):
                     g.add_edge(sourceName, targetName)
                     added_edges.add(edgeName)
 
-
-    #g.add_edges([[0,1], [1,2], [2,0], [2,3], [3,4], [4,5]])
+    clusters = []
 
 
     # vd_betweenness = g.community_edge_betweenness(directed=False)
@@ -61,18 +60,40 @@ def community_using_igraph(data, origPerson, edgeFunc):
     # vd_fastgreedy = g.community_fastgreedy()
     #TODO print vd_fastgreedy
 
-    clusters = g.community_infomap()
+    try:
+        # edge_weights, vertex_weights
+        clusters = g.community_infomap()
+    except:
+        clusters = []
     infomap_clusters = extract_clusters(clusters, reverseIdMap)
 
-    clusters = g.community_leading_eigenvector()
+    try:
+        # weights
+        clusters = g.community_leading_eigenvector()
+    except:
+        clusters = []
     eigen_clusters = extract_clusters(clusters, reverseIdMap)
 
-    #TODO print g.community_label_propagation()
+    try:
+        # weights
+        clusters = g.community_label_propagation()
+    except:
+        clusters = []
+    label_clusters = extract_clusters(clusters, reverseIdMap)
 
-    #TODO print g.community_multilevel()
+    try:
+        # weights
+        clusters = g.community_multilevel()
+    except:
+        clusters = []
+    multi_clusters = extract_clusters(clusters, reverseIdMap)
 
-    #TODO print g.community_spinglass()
+    try:
+        clusters = g.community_spinglass()
+    except:
+        clusters = []
+    spin_clusters = extract_clusters(clusters, reverseIdMap)
 
     #TODO print g.community_walktrap()
 
-    return infomap_clusters, eigen_clusters
+    return infomap_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters
