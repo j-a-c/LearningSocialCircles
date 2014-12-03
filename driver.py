@@ -459,8 +459,27 @@ if __name__ == '__main__':
 
         elif args.p == 'igraph':
             print 'Using igraph community detection algorithms.'
-            origPerson = '239'
-            ret = community_using_igraph(data, origPerson)
+            info_clusters_dict = {}
+            eigen_clusters_dict = {}
+
+            for origPerson in data.trainingMap:
+                info_clusters, eigen_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
+
+                info_clusters_dict[origPerson] = info_clusters
+                eigen_clusters_dict[origPerson] = eigen_clusters
+
+            real_training_data = 'real_training_data.csv'
+            info_clusters_data = 'infomap_clusters_data.csv'
+            eigen_clusters_data = 'eigen_clusters_data.csv'
+
+            writeSubmission(real_training_data, data.trainingMap)
+            writeSubmission(info_clusters_data, info_clusters_dict)
+            writeSubmission(eigen_clusters_data, eigen_clusters_dict)
+
+            printMetricCommand(real_training_data, info_clusters_data)
+            printMetricCommand(real_training_data, eigen_clusters_data)
+
+
 
         elif args.p == 'mcl':
             print 'Using Markov clustering algorithm.'
