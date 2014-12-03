@@ -39,10 +39,8 @@ def community_using_igraph(data, origPerson, edgeFunc):
     g = igraph.Graph()
 
     g.add_vertices(numFriends)
-    print origPerson
-    print numFriends, currentId
     for source in idMap:
-        for target in friendMap[source]:
+        for target in idMap:
             # Do not add self edges
             if source != target:
                 sourceName = idMap[source]
@@ -57,11 +55,11 @@ def community_using_igraph(data, origPerson, edgeFunc):
     #g.add_edges([[0,1], [1,2], [2,0], [2,3], [3,4], [4,5]])
 
 
-    vd_betweenness = g.community_edge_betweenness(directed=False)
-    print vd_betweenness#.as_clustering(5)
+    # vd_betweenness = g.community_edge_betweenness(directed=False)
+    #TODO print vd_betweenness#.as_clustering(5)
 
-    vd_fastgreedy = g.community_fastgreedy()
-    print vd_fastgreedy
+    # vd_fastgreedy = g.community_fastgreedy()
+    #TODO print vd_fastgreedy
 
     print '= info map'
     clusters = g.community_infomap()
@@ -72,18 +70,14 @@ def community_using_igraph(data, origPerson, edgeFunc):
     eigen_clusters = extract_clusters(clusters, reverseIdMap)
 
     print '= label prop'
-    print g.community_label_propagation()
+    #TODO print g.community_label_propagation()
 
     print '= multilevel'
-    print g.community_multilevel()
+    #TODO print g.community_multilevel()
 
     print '= spinglass'
-    print g.community_spinglass()
+    #TODO print g.community_spinglass()
 
-    print g.community_walktrap()
-
-    print 'Actual # clusters:', len(data.trainingMap[origPerson])
-    print 'Actual clusters:'
-    print data.trainingMap[origPerson]
+    #TODO print g.community_walktrap()
 
     return infomap_clusters, eigen_clusters

@@ -462,7 +462,10 @@ if __name__ == '__main__':
             info_clusters_dict = {}
             eigen_clusters_dict = {}
 
-            for origPerson in data.trainingMap:
+            trainingPeople
+            for origPersonIndex in range(len(trainingPeople)):
+                print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
+                origPerson = trainingPeople[origPersonIndex]
                 info_clusters, eigen_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge])
 
                 info_clusters_dict[origPerson] = info_clusters
