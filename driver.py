@@ -328,6 +328,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', action='store_true', help='Visualize data. By \
             default uses original topology to construct graphs.')
     parser.add_argument('--edge', action='store', help='Select edge function')
+    parser.add_argument('--prune', action='store', help='Select pruning function')
     parser.add_argument('--split', action='store_true', help='Split \
             visualizations by circle.')
     parser.add_argument('--save', action='store_true', help='Save output. \
@@ -349,6 +350,14 @@ if __name__ == '__main__':
     if args.edge not in EDGE_FUNCS:
         print 'Invalid edge function:', args.edge
         print 'Allowable edge functions:', EDGE_FUNCS.keys()
+        quit()
+
+    PRUNE_FUNCS = {
+        None: None
+    }
+    if args.prune not in PRUNE_FUNCS:
+        print 'Invalid prune function:', args.prune
+        print 'Allowable prune functions:', PRUNE_FUNCS.keys()
         quit()
 
 

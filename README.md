@@ -32,3 +32,5 @@ Flags:
   * sim: Creates edges between similar users.
   * tri: Creates edges between users with friends in common.
   * combo: Uses both 'tri' and 'sim' to create edges.
+- --prune Select a post-cluster-prediction pruning method. Supported options are:
+  * small: Remove small clusters.
