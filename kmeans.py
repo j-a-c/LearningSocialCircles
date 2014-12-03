@@ -49,7 +49,8 @@ class KMeans(object):
                 if similarity > maximum_similarity:
                     maximum_similarity = similarity
                     maximum_similarity_centroid = centroid
-            clusters[maximum_similarity_centroid].append(data_point)
+            if maximum_similarity_centroid:
+                clusters[maximum_similarity_centroid].append(data_point)
         
         #return the computed clusters
         return clusters
@@ -86,7 +87,7 @@ class KMeans(object):
                     minimum_similarity = similarity
                 if similarity > maximum_similarity:
                     maximum_similarity = similarity
-            #print('max sim: ' + str(maximum_similarity) + ' min sim: ' + str(minimum_similarity))
+            #print('centroid: ' + str(centroid) + 'max sim: ' + str(maximum_similarity) + ' min sim: ' + str(minimum_similarity))
                     
             #if similarity difference is more than a threshold, drop friends with 
             #small similarity from circle/cluster
@@ -98,6 +99,7 @@ class KMeans(object):
                         friends_to_remove.append(friend)
                 for friend_to_remove in friends_to_remove:
                     clusters[centroid].remove(friend_to_remove)
+     
         return clusters
     
     def setSimilarityCalculator(self, similarity_calculator):

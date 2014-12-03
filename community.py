@@ -14,8 +14,6 @@ def extract_clusters(clusters, reverseIdMap):
         new_clusters.append(next_cluster)
     return new_clusters
 
-
-
 def community_using_igraph(data, origPerson, edgeFunc, pruneFunc):
     friendMap = data.friendMap
 

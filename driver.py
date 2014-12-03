@@ -9,11 +9,7 @@ from sklearn.linear_model import Ridge
 from prune import noPrune
 from stats import statify
 from visualize import Visualizer
-from weights import friendsInCommon
-from weights import originalTopology
-from weights import originalTopologyAndAttributeIntersection
-from weights import similarAttributes
-from weights import topologyAndAttributes
+from weights import Igraphh_WeightCalculator
 from userData import Persons
 from kmeans import KMeans
 
@@ -338,20 +334,6 @@ if __name__ == '__main__':
             during visualization calculations.')
     args = parser.parse_args()
 
-    # Validate arguments
-    EDGE_FUNCS = {
-            'top': originalTopology,
-            'sim': similarAttributes,
-            'tri': friendsInCommon,
-            'combo': topologyAndAttributes,
-            'top-intersect': originalTopologyAndAttributeIntersection,
-            None: originalTopology
-    }
-    if args.edge not in EDGE_FUNCS:
-        print 'Invalid edge function:', args.edge
-        print 'Allowable edge functions:', EDGE_FUNCS.keys()
-        quit()
-
     PRUNE_FUNCS = {
         None: noPrune
     }
@@ -388,6 +370,22 @@ if __name__ == '__main__':
         print 'Data was not imported in the correct format.'
         exit()
 
+    #moving it down because i need featureweightmap - gaurav
+    igraph_wt_clac = Igraphh_WeightCalculator(featureWeightMap)
+    # Validate arguments
+    EDGE_FUNCS = {
+            'top': igraph_wt_clac.originalTopology,
+            'sim': igraph_wt_clac.similarAttributes,
+            'tri': igraph_wt_clac.friendsInCommon,
+            'combo': igraph_wt_clac.topologyAndAttributes,
+            'top-intersect': igraph_wt_clac.originalTopologyAndAttributeIntersection,
+            'wt-attr-top': igraph_wt_clac.originalTopologyAndWeightedAttrubuites,
+            None: igraph_wt_clac.originalTopology
+    }
+    if args.edge not in EDGE_FUNCS:
+        print 'Invalid edge function:', args.edge
+        print 'Allowable edge functions:', EDGE_FUNCS.keys()
+        quit()
     # List of people to calculate training data for.
     trainingPeople = []
     for key in data.trainingMap:
