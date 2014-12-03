@@ -61,21 +61,16 @@ def community_using_igraph(data, origPerson, edgeFunc):
     # vd_fastgreedy = g.community_fastgreedy()
     #TODO print vd_fastgreedy
 
-    print '= info map'
     clusters = g.community_infomap()
     infomap_clusters = extract_clusters(clusters, reverseIdMap)
 
-    print '= lead eigen'
     clusters = g.community_leading_eigenvector()
     eigen_clusters = extract_clusters(clusters, reverseIdMap)
 
-    print '= label prop'
     #TODO print g.community_label_propagation()
 
-    print '= multilevel'
     #TODO print g.community_multilevel()
 
-    print '= spinglass'
     #TODO print g.community_spinglass()
 
     #TODO print g.community_walktrap()
