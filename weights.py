@@ -61,7 +61,7 @@ def attributeIntersection(data, person1, person2):
 
     intersection = len(profile_attrs1.intersection(profile_attrs2))
     union = len(profile_attrs1.union(profile_attrs2))
-    if intersection < 4:
+    if intersection < 5:
         return None
     else:
         return (1.0 * intersection) / union
