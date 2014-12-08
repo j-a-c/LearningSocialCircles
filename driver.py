@@ -6,6 +6,7 @@ from sklearn.linear_model import BayesianRidge
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Ridge
+from prune import copyBiggest
 from prune import noPrune
 from stats import statify
 from visualize import Visualizer
@@ -335,7 +336,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     PRUNE_FUNCS = {
-        None: noPrune
+            'copyBiggest': copyBiggest,
+            None: noPrune
     }
     if args.prune not in PRUNE_FUNCS:
         print 'Invalid prune function:', args.prune
@@ -473,43 +475,45 @@ if __name__ == '__main__':
 
         elif args.p == 'igraph':
             print 'Using igraph community detection algorithms.'
-#             info_clusters_dict = {}
-#             eigen_clusters_dict = {}
-#             label_clusters_dict = {}
-#             multi_clusters_dict = {}
-#             spin_clusters_dict = {}
-# 
-#             print 'Calculating training data.'
-#             for origPersonIndex in range(len(trainingPeople)):
-#                 print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
-#                 origPerson = trainingPeople[origPersonIndex]
-#                 info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge], PRUNE_FUNCS[args.prune])
-# 
-#                 info_clusters_dict[origPerson] = info_clusters
-#                 eigen_clusters_dict[origPerson] = eigen_clusters
-#                 label_clusters_dict[origPerson] = label_clusters
-#                 multi_clusters_dict[origPerson] = multi_clusters
-#                 spin_clusters_dict[origPerson] = spin_clusters
-# 
-#             real_training_data = 'real_training_data.csv'
-#             info_clusters_data = 'infomap_clusters_data.csv'
-#             eigen_clusters_data = 'eigen_clusters_data.csv'
-#             label_clusters_data = 'label_clusters_data.csv'
-#             multi_clusters_data = 'multi_clusters_data.csv'
-#             spin_clusters_data = 'spin_clusters_data.csv'
-# 
-#             writeSubmission(real_training_data, data.trainingMap)
-#             writeSubmission(info_clusters_data, info_clusters_dict)
-#             writeSubmission(eigen_clusters_data, eigen_clusters_dict)
-#             writeSubmission(label_clusters_data, label_clusters_dict)
-#             writeSubmission(multi_clusters_data, multi_clusters_dict)
-#             writeSubmission(spin_clusters_data, spin_clusters_dict)
-# 
-#             printMetricCommand(real_training_data, info_clusters_data)
-#             printMetricCommand(real_training_data, eigen_clusters_data)
-#             printMetricCommand(real_training_data, label_clusters_data)
-#             printMetricCommand(real_training_data, multi_clusters_data)
-#             printMetricCommand(real_training_data, spin_clusters_data)
+            """
+            info_clusters_dict = {}
+            eigen_clusters_dict = {}
+            label_clusters_dict = {}
+            multi_clusters_dict = {}
+            spin_clusters_dict = {}
+
+            print 'Calculating training data.'
+            for origPersonIndex in range(len(trainingPeople)):
+                print '\t' + str(1 + origPersonIndex) + '/' + str(len(trainingPeople))
+                origPerson = trainingPeople[origPersonIndex]
+                info_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters = community_using_igraph(data, origPerson, EDGE_FUNCS[args.edge], PRUNE_FUNCS[args.prune])
+
+                info_clusters_dict[origPerson] = info_clusters
+                eigen_clusters_dict[origPerson] = eigen_clusters
+                label_clusters_dict[origPerson] = label_clusters
+                multi_clusters_dict[origPerson] = multi_clusters
+                spin_clusters_dict[origPerson] = spin_clusters
+
+            real_training_data = 'real_training_data.csv'
+            info_clusters_data = 'infomap_clusters_data.csv'
+            eigen_clusters_data = 'eigen_clusters_data.csv'
+            label_clusters_data = 'label_clusters_data.csv'
+            multi_clusters_data = 'multi_clusters_data.csv'
+            spin_clusters_data = 'spin_clusters_data.csv'
+
+            writeSubmission(real_training_data, data.trainingMap)
+            writeSubmission(info_clusters_data, info_clusters_dict)
+            writeSubmission(eigen_clusters_data, eigen_clusters_dict)
+            writeSubmission(label_clusters_data, label_clusters_dict)
+            writeSubmission(multi_clusters_data, multi_clusters_dict)
+            writeSubmission(spin_clusters_data, spin_clusters_dict)
+
+            printMetricCommand(real_training_data, info_clusters_data)
+            printMetricCommand(real_training_data, eigen_clusters_data)
+            printMetricCommand(real_training_data, label_clusters_data)
+            printMetricCommand(real_training_data, multi_clusters_data)
+            printMetricCommand(real_training_data, spin_clusters_data)
+            """
 
             print 'Calculating Kaggle submission data.'
             # Reset dictionaries.
@@ -555,7 +559,8 @@ if __name__ == '__main__':
             # Markov Cluster Algorithm
             mclCirclMap = {}
             counter = 1
-            for currentPerson in trainingPeople:
+            #for currentPerson in trainingPeople:
+            for currentPerson in kagglePeople:
                 # Report progress
                 print counter, '/', len(trainingPeople)
                 counter += 1

@@ -53,35 +53,10 @@ class Igraphh_WeightCalculator:
             return 1.0
         else:
             return None
-    
-    def attributeIntersection(self, data, person1, person2):
-        profile_attrs1 = Set()
-        profile_attrs2 = Set()
-    
-        for feature in data.featureMap[person1]:
-            profile_attrs1.add(data.featureMap[person1][feature])
-        for feature in data.featureMap[person2]:
-            profile_attrs2.add(data.featureMap[person2][feature])
-    
-        intersection = len(profile_attrs1.intersection(profile_attrs2))
-        union = len(profile_attrs1.union(profile_attrs2))
-        if intersection == 0:
-            return None
-        else:
-            return (1.0 * intersection) / union
+
     
     
-    def originalTopologyAndAttributeIntersection(self, data, person1, person2):
-        weight1 = self.originalTopology(data, person1, person2)
-        weight2 = self.attributeIntersection(data, person1, person2)
-    
-        if weight1 == None:
-            return weight2
-        if weight2 == None:
-            return weight1
-    
-        return weight1 + weight2
-    
+       
     def weightedAttrubuites(self, data, person1, person2):
         weightAttributes = 0
         
@@ -111,3 +86,31 @@ class Igraphh_WeightCalculator:
         
         return weightAttributes + weightOriginalTopology
     
+
+def attributeIntersection(data, person1, person2):
+    profile_attrs1 = Set()
+    profile_attrs2 = Set()
+
+    for feature in data.featureMap[person1]:
+        profile_attrs1.add(data.featureMap[person1][feature])
+    for feature in data.featureMap[person2]:
+        profile_attrs2.add(data.featureMap[person2][feature])
+
+    intersection = len(profile_attrs1.intersection(profile_attrs2))
+    union = len(profile_attrs1.union(profile_attrs2))
+    if intersection < 5:
+        return None
+    else:
+        return (1.0 * intersection) / union
+
+
+def originalTopologyAndAttributeIntersection(data, person1, person2):
+    weight1 = originalTopology(data, person1, person2)
+    weight2 = attributeIntersection(data, person1, person2)
+
+    if weight1 == None:
+        return weight2
+    if weight2 == None:
+        return weight1
+
+    return weight1 + weight2

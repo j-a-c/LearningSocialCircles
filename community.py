@@ -69,6 +69,7 @@ def community_using_igraph(data, origPerson, edgeFunc, pruneFunc):
     infomap_clusters = extract_clusters(clusters, reverseIdMap)
     infomap_clusters = pruneFunc(data, origPerson, infomap_clusters)
 
+    """
     try:
         # weights
         #clusters = g.community_leading_eigenvector(weights='weight')
@@ -103,3 +104,6 @@ def community_using_igraph(data, origPerson, edgeFunc, pruneFunc):
     #TODO print g.community_walktrap()
 
     return infomap_clusters, eigen_clusters, label_clusters, multi_clusters, spin_clusters
+    """
+    return infomap_clusters, infomap_clusters, infomap_clusters, infomap_clusters, infomap_clusters
+
